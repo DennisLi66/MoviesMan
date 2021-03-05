@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require("express");
+const https = require("https");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
@@ -7,26 +8,36 @@ const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 
-//GET ROUTES
-
+//Home
 app.get("/",function(req,res){ //ideally a homepage
 
 });
+app.get("/about", function(req,res){ //server information about this site in specifities
 
-app.post("/",function(req,res){
+});
+// Registration and Login
+app.route("/register")
+  .get()
+  .post()
+
+app.route("/login")
+  .get()
+  .post()
+// Search Information
+app.get("/search",function(req,res){//search and search results
+
+})
+// Movie Page - IMDB Information, Reviews
+app.get("/movie",function(req,res){ //redirect?
+
+})
+app.get("/movie/:movieTitle",function(req,res){
+
+})
+// Profile Information - Liked Movies, Movie Reviews
+app.get("/profile",function(req,res){
   
 })
+app.get("/profile/:username",function(req,res){
 
-app.get("/register",function(req,res){ //serve a registration page
-
-});
-
-app.get("/login", function(req,res){ //serve a login page
-
-});
-
-app.get("/about", function(req,res){
-
-});
-
-//POST ROUTES
+})
