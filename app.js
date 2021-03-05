@@ -13,21 +13,27 @@ app.use(express.static("public"));
 app.set('view engine','ejs');
 app.use(bodyParser.urlencoded({extended:true}));
 
+//can render between a logged in version and a logged out version
+// will need to add if authenticated later on
 
 //Home
 app.get("/",function(req,res){ //ideally a homepage
   res.render("home");
 });
 app.get("/about", function(req,res){ //server information about this site in specifities
-
+  res.render("about");
 });
 // Registration and Login
 app.route("/register")
-  .get()
+  .get(function(req,res){
+    res.render("register")
+  })
   .post()
 
 app.route("/login")
-  .get()
+  .get(function(req,res){
+    res.render("login")
+  })
   .post()
 // Search Information
 app.get("/search",function(req,res){//search and search results
