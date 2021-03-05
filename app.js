@@ -8,9 +8,15 @@ const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 
+const app = express();
+app.use(express.static("public"));
+app.set('view engine','ejs');
+app.use(bodyParser.urlencoded({extended:true}));
+
+
 //Home
 app.get("/",function(req,res){ //ideally a homepage
-
+  res.render("home");
 });
 app.get("/about", function(req,res){ //server information about this site in specifities
 
@@ -36,8 +42,14 @@ app.get("/movie/:movieTitle",function(req,res){
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){
-  
+
 })
 app.get("/profile/:username",function(req,res){
 
 })
+
+
+
+app.listen(3000,function(){
+  console.log("Server Started.")
+});
