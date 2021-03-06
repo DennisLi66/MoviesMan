@@ -4,5 +4,12 @@
 <a href="/about"> About </a>
 <a href="/register"> Register </a>
 
+<form action="/login" method="POST">
+    <label for="email">Email</label>
+    <input type="email" name="username">
+    <label for="password">Password</label>
+    <input type="password" name="password">
+  <button type="submit" class="btn btn-dark">Register</button>
+</form>
 
 <%- include('partials/footer') %>
