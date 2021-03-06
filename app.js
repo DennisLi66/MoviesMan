@@ -53,6 +53,22 @@ app.get("/search",function(req,res){//search and search results
       //authentication check
       res.serve("search");
   }
+  else{
+    if (req.query.title){
+      console.log(req.query.title);
+    }
+    if (req.query.year){
+      console.log(req.query.year);
+    }
+    if (req.query.act){
+      console.log(req.query.act);
+    }
+    if (req.query.director){
+      console.log(req.query.director);
+    }
+    //get movie api and serve it
+    res.render("search");
+  }
 })
 // Movie Page - IMDB Information, Reviews
 app.get("/movie",function(req,res){ //redirect?
