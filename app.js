@@ -28,26 +28,41 @@ app.route("/register")
   .get(function(req,res){
     res.render("register")
   })
-  .post()
+  .post(function(req,res){
+    //validate username and password, then create an account
+    console.log(req.body.username);
+    console.log(req.body.password);
+    console.log(process.env.SECRET);
+    res.redirect("/login");
+  })
 
 app.route("/login")
   .get(function(req,res){
     res.render("login")
   })
-  .post()
+  .post(function(req,res){
+    console.log(req.body.username);
+    console.log(req.body.password);
+    console.log(process.env.SECRET);
+    res.redirect("/login");
+  })
 // Search Information
 app.get("/search",function(req,res){//search and search results
-
+  console.log(req.query);
+  if (req.query.length == 0){ //basic search page
+      //authentication check
+      res.serve("search");
+  }
 })
 // Movie Page - IMDB Information, Reviews
 app.get("/movie",function(req,res){ //redirect?
-
+  res.redirect("/search");
 })
 app.get("/movie/:movieTitle",function(req,res){
 
 })
 // Profile Information - Liked Movies, Movie Reviews
-app.get("/profile",function(req,res){
+app.get("/profile",function(req,res){ //maybe a place to search for profiles
 
 })
 app.get("/profile/:username",function(req,res){
