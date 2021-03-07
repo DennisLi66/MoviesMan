@@ -57,7 +57,7 @@ app.route("/register")
         }
         else{
           if (results.length > 0){
-            res.redirect("/register"); // that account already exists //////////FIX THIS
+            res.redirect("/register"); // that account already exists //////////FIX THIS TO ERROR MESSAGE
           }
           else{
             var insertStatement = "INSERT INTO users (username,email,pswrd) VALUES (?, ?, ?)";
@@ -81,10 +81,30 @@ app.route("/login")
     res.render("login")
   })
   .post(function(req,res){
-    console.log(req.body.username);
-    console.log(req.body.password);
-    console.log(process.env.SECRET);
-    res.redirect("/login");
+    var email = req.body.username;
+    var password = req.body.password; //FIX FOR SALTING
+    console.log(email);
+    var sQuery = "SELECT * FROM users WHERE email = ?";
+    connection.query(sQuery,[email],function(eror, results, fields){
+      if (eror){
+        console.log(eror);
+        res.redirect("/login");
+      }
+      else{
+        // CHECK THAT PASSWORD MATCHES / SALTED PASSWORD MATCHES
+        if (results.length == 0){
+          res.redirect("/login"); //FIX THIS ERROR MESSAGE
+        }
+        else{
+          var resPass = results[0].pswrd;
+          if (resPass === password){
+            console.log(results[0].username + " logged in.");
+            res.redirect("/login");
+          }
+          //FIX THIS ADD COOKIES / AUTHENTICATION
+        }
+      }
+    })
   })
 // Search Information
 app.get("/search",function(req,res){//search and search results
