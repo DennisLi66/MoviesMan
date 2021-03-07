@@ -3,18 +3,53 @@ const express = require("express");
 const https = require("https");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const mongoose = require("mongoose");
-const session = require("express-session");
-const passport = require("passport");
-const passportLocalMongoose = require("passport-local-mongoose");
+// const mongoose = require("mongoose");
+// const session = require("express-session");
+// const passport = require("passport");
+// const passportLocalMongoose = require("passport-local-mongoose");
+const cookieParser = require('cookie-parser');
+const mysql = require('mysql');
+
+
 
 const app = express();
 app.use(express.static("public"));
 app.set('view engine','ejs');
 app.use(bodyParser.urlencoded({extended:true}));
 
+app.use(session({
+  secret: process.env.SECRET, //env variable
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+const conn = "mongodb://" + process.env.HOST + ":" + process.env.PORT + "/" + process.env.DATABASE;
+
+mongoose.connect(conn, {useNewUrlParser: true});
+mongoose.set("useCreateIndex",true);
 //can render between a logged in version and a logged out version
 // will need to add if authenticated later on
+
+//info should include username
+
+//MONGOOSE
+// const userSchema = new mongoose.Schema({
+//   userid: Number, //corresponds with user counter
+//   email: String,
+//   username: String,
+//   password: String
+// });
+//
+// const likedMoviesSchema = new mongoose.Schema({
+//
+// });
+//
+// const ratingsSchema = new mongoose.Schema({
+//
+// });
 
 //Home
 app.get("/",function(req,res){ //ideally a homepage
