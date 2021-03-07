@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const cookieParser = require('cookie-parser');
 const mysql = require('mysql');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
 
 const app = express();
 app.use(express.static("public"));
