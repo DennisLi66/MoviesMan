@@ -3,53 +3,25 @@ const express = require("express");
 const https = require("https");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-// const mongoose = require("mongoose");
-// const session = require("express-session");
-// const passport = require("passport");
-// const passportLocalMongoose = require("passport-local-mongoose");
 const cookieParser = require('cookie-parser');
 const mysql = require('mysql');
-
-
 
 const app = express();
 app.use(express.static("public"));
 app.set('view engine','ejs');
 app.use(bodyParser.urlencoded({extended:true}));
 
-app.use(session({
-  secret: process.env.SECRET, //env variable
-  resave: false,
-  saveUninitialized: false
-}));
+var connection = mysql.createConnection({
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE
+})
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-const conn = "mongodb://" + process.env.HOST + ":" + process.env.PORT + "/" + process.env.DATABASE;
-
-mongoose.connect(conn, {useNewUrlParser: true});
-mongoose.set("useCreateIndex",true);
+connection.connect();
 //can render between a logged in version and a logged out version
 // will need to add if authenticated later on
 
-//info should include username
-
-//MONGOOSE
-// const userSchema = new mongoose.Schema({
-//   userid: Number, //corresponds with user counter
-//   email: String,
-//   username: String,
-//   password: String
-// });
-//
-// const likedMoviesSchema = new mongoose.Schema({
-//
-// });
-//
-// const ratingsSchema = new mongoose.Schema({
-//
-// });
 
 //Home
 app.get("/",function(req,res){ //ideally a homepage
@@ -65,10 +37,43 @@ app.route("/register")
   })
   .post(function(req,res){
     //validate username and password, then create an account
-    console.log(req.body.username);
-    console.log(req.body.password);
-    console.log(process.env.SECRET);
-    res.redirect("/login");
+    //VALIDATION - Make sure there are no other accounts that use this email.
+    var email = req.body.email;
+    var password = req.body.password;
+    var cPassword = req.body.cPassword;
+    var username = req.body.username;
+    if (cPassword !== password){ //confirmation did not match
+      res.redirect("/register"); //change to one with an error message ////////////////////FIX THIS
+    }
+    else{
+      // console.log(req.body.email);
+      // console.log(req.body.username);
+      // console.log(req.body.password);
+      var query1 = "SELECT username FROM users WHERE email = " + connection.escape(email);
+      console.log(query1);
+      connection.query(query1,function(err,results,fields){
+        if (err){
+          console.log(err);
+        }
+        else{
+          if (results.length > 0){
+            res.redirect("/register"); // that account already exists //////////FIX THIS
+          }
+          else{
+            var insertStatement = "INSERT INTO users (username,email,pswrd) VALUES (?, ?, ?)";
+            connection.query(insertStatement,[username,email,password],function(er1r,results,fields){ ///////FIX THIS ADD SALTING
+                if (er1r){
+                  console.log(er1r);
+                  res.redirect("/register"); //FIX THIS TO ERROR MESSAGE
+                }
+                else{
+                  res.redirect("/login"); ///FIX THIS TO CONFIRMATION
+              }
+            })
+          }
+        }
+    })
+    }
   })
 
 app.route("/login")
