@@ -3,7 +3,7 @@ const express = require("express");
 const https = require("https");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser'); //FIX THIS: ADD COOKIES
 const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
@@ -52,7 +52,6 @@ app.route("/register")
       // console.log(req.body.username);
       // console.log(req.body.password);
       var query1 = "SELECT username FROM users WHERE email = " + connection.escape(email);
-      console.log(query1);
       connection.query(query1,function(err,results,fields){
         if (err){
           console.log(err);
@@ -63,20 +62,29 @@ app.route("/register")
           }
           else{
             var insertStatement = "INSERT INTO users (username,email,pswrd) VALUES (?, ?, ?)";
-            connection.query(insertStatement,[username,email,password],function(er1r,results,fields){ ///////FIX THIS ADD SALTING
-                if (er1r){
-                  console.log(er1r);
-                  res.redirect("/register"); //FIX THIS TO ERROR MESSAGE
+            bcrypt.hash(password, 10, function(e2rr, hash) {
+                // Store hash in your password DB.
+                if (e2rr){
+                  console.log(e2rr);
+                  res.redirect("/register");
                 }
                 else{
-                  res.redirect("/login"); ///FIX THIS TO CONFIRMATION
-              }
-            })
+                connection.query(insertStatement,[username,email,hash],function(er1r,results,fields){ ///////FIX THIS ADD SALTING
+                    if (er1r){
+                      console.log(er1r);
+                      res.redirect("/register"); //FIX THIS TO ERROR MESSAGE
+                    }
+                    else{
+                      res.redirect("/login"); ///FIX THIS TO CONFIRMATION
+                      }
+                });
+                }
+            });
           }
         }
     })
     }
-  })
+  });
 
 app.route("/login")
   .get(function(req,res){
@@ -84,7 +92,7 @@ app.route("/login")
   })
   .post(function(req,res){
     var email = req.body.username;
-    var password = req.body.password; //FIX FOR SALTING
+    var password = req.body.password; 
     console.log(email);
     var sQuery = "SELECT * FROM users WHERE email = ?";
     connection.query(sQuery,[email],function(eror, results, fields){
@@ -93,16 +101,22 @@ app.route("/login")
         res.redirect("/login");
       }
       else{
-        // CHECK THAT PASSWORD MATCHES / SALTED PASSWORD MATCHES
         if (results.length == 0){
           res.redirect("/login"); //FIX THIS ERROR MESSAGE
         }
         else{
           var resPass = results[0].pswrd;
-          if (resPass === password){
-            console.log(results[0].username + " logged in.");
-            res.redirect("/login");
-          }
+          bcrypt.compare(password, resPass, function(err, rresult) {
+              // result == true
+              if (rresult){
+                console.log(results[0].username + " logged in.");
+                res.redirect("/login");
+              }
+              else{
+                console.log("Logging in failed.")
+                res.redirect("/login");
+              }
+          });
           //FIX THIS ADD COOKIES / AUTHENTICATION
         }
       }
