@@ -12,21 +12,24 @@ const app = express();
 app.use(express.static("public"));
 app.set('view engine','ejs');
 app.use(bodyParser.urlencoded({extended:true}));
-
+app.use(cookieParser());
 var connection = mysql.createConnection({
   host: process.env.HOST,
   user: process.env.USER,
   password: process.env.PASSWORD,
-  database: process.env.DATABASE
-})
-
+  database: process.env.DATABASE})
 connection.connect();
 //can render between a logged in version and a logged out version
 // will need to add if authenticated later on
 
-
-//Home
+//Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/",function(req,res){ //ideally a homepage
+  if (req.cookies.userData){ //FIX THIS: REDIRECT TO LOGGED IN VERSION
+    console.log(req.cookies.userData.name);
+  }
+  else{
+    console.log("Anon User");
+  }
   res.render("home");
 });
 app.get("/about", function(req,res){ //server information about this site in specifities
@@ -35,7 +38,11 @@ app.get("/about", function(req,res){ //server information about this site in spe
 // Registration and Login
 app.route("/register")
   .get(function(req,res){
-    res.render("register")
+    if (req.cookies.userData){
+      console.log("User is already logged in! Redirecting...")
+      res.redirect("/");
+    }
+    else{res.render("register")}
   })
   .post(function(req,res){
     //validate username and password, then create an account
@@ -85,14 +92,16 @@ app.route("/register")
     })
     }
   });
-
 app.route("/login")
   .get(function(req,res){
-    res.render("login")
-  })
+    if (req.cookies.userData){
+      console.log("User is already logged in! Redirecting...")
+      res.redirect("/");
+    }
+    else{res.render("login")}})
   .post(function(req,res){
     var email = req.body.username;
-    var password = req.body.password; 
+    var password = req.body.password;
     console.log(email);
     var sQuery = "SELECT * FROM users WHERE email = ?";
     connection.query(sQuery,[email],function(eror, results, fields){
@@ -107,21 +116,47 @@ app.route("/login")
         else{
           var resPass = results[0].pswrd;
           bcrypt.compare(password, resPass, function(err, rresult) {
-              // result == true
               if (rresult){
                 console.log(results[0].username + " logged in.");
-                res.redirect("/login");
+                let cookieObj = {
+                  name: results[0].username
+                }
+                res.cookie("userData",cookieObj,{expires:new Date(5000 + Date.now())}); //FIX THIS INTO LONGER TIME BASED COOKIE
+                res.redirect("/");
               }
               else{
                 console.log("Logging in failed.")
                 res.redirect("/login");
               }
           });
-          //FIX THIS ADD COOKIES / AUTHENTICATION
         }
       }
     })
   })
+app.route("/forgot") //FIX THIS: send an email that opens a link that randomly generates and mails a new password
+  .get(function(req,res){
+    if (req.cookies.userData){
+      console.log("User is already logged in! Redirecting...")
+      res.redirect("/");
+    }
+    else{
+      res.render("/forgot");
+    }
+  })
+  .post(function(req,res){})
+app.get("/logout",function(req,res){
+  //console.log(req.cookies.userData);
+  if (req.cookies.userData){
+    var username = req.cookies.userData.name;
+    res.clearCookie('userData');
+    console.log(username + " has been logged out.");
+    res.render("/logout")
+  }
+  else{
+    console.log("User isn't even logged in! Redirecting...");
+    res.redirect("/");
+  }
+})
 // Search Information
 app.get("/search",function(req,res){//search and search results
   console.log(req.query);
@@ -160,8 +195,6 @@ app.get("/profile",function(req,res){ //maybe a place to search for profiles
 app.get("/profile/:username",function(req,res){
 
 })
-
-
 
 app.listen(3000,function(){
   console.log("Server Started.")
