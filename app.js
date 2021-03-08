@@ -25,12 +25,13 @@ connection.connect();
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/",function(req,res){ //ideally a homepage
   if (req.cookies.userData){ //FIX THIS: REDIRECT TO LOGGED IN VERSION
-    console.log(req.cookies.userData.name);
+    console.log(req.cookies.userData.name + "is currently logged in.");
+    res.render("homeIN");
   }
   else{
     console.log("Anon User");
+    res.render("homeOUT");
   }
-  res.render("home");
 });
 app.get("/about", function(req,res){ //server information about this site in specifities
   res.render("about");
