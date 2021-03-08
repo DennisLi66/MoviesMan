@@ -24,8 +24,8 @@ connection.connect();
 
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/",function(req,res){ //ideally a homepage
-  if (req.cookies.userData){ //FIX THIS: REDIRECT TO LOGGED IN VERSION
-    console.log(req.cookies.userData.name + "is currently logged in.");
+  if (req.cookies.userData){
+    console.log(req.cookies.userData.name + " is currently logged in.");
     res.render("homeIN");
   }
   else{
@@ -34,7 +34,14 @@ app.get("/",function(req,res){ //ideally a homepage
   }
 });
 app.get("/about", function(req,res){ //server information about this site in specifities
-  res.render("about");
+  if (req.cookies.userData){
+    console.log(req.cookies.userData.name + " is currently logged in.");
+    res.render("aboutIN");
+  }
+  else{
+    console.log("Anon User");
+    res.render("aboutOUT");
+  }
 });
 // Registration and Login
 app.route("/register")
@@ -146,12 +153,11 @@ app.route("/forgot") //FIX THIS: send an email that opens a link that randomly g
   })
   .post(function(req,res){})
 app.get("/logout",function(req,res){
-  //console.log(req.cookies.userData);
   if (req.cookies.userData){
     var username = req.cookies.userData.name;
     res.clearCookie('userData');
     console.log(username + " has been logged out.");
-    res.render("/logout")
+    res.render("logout",{toRemovUser: username})
   }
   else{
     console.log("User isn't even logged in! Redirecting...");
