@@ -194,11 +194,32 @@ app.get("/movie/:movieTitle",function(req,res){
 
 })
 // Profile Information - Liked Movies, Movie Reviews
-app.get("/profile",function(req,res){ //maybe a place to search for profiles
-
+app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
+  if (req.cookies.userData){
+    var username = req.cookies.userData.name;
+    res.redirect("/profile/" + username);
+  }
+  else{
+    console.log("User isn't even logged in! Redirecting...");
+    res.redirect("/");
+  }
 })
 app.get("/profile/:username",function(req,res){
-
+  // FIX THIS: CSS NOT WORKING
+  // FIX THIS: PREVENT BOGUS PROFILE NAMES
+  var profUser = req.params.username;
+  if (req.cookies.userData){
+    var username = req.cookies.userData.name;
+    if (username === profUser){
+      res.render('profileOWNER',{profuser: profUser});
+    }
+    else{
+      res.render('profileIN',{profuser: profUser})
+    }
+  }
+  else{
+    res.render('profileOUT',{profuser: profUser})
+  }
 })
 
 app.listen(3000,function(){

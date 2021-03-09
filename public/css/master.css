@@ -1,5 +1,6 @@
 body{
   background-color: black;
+  color: white;
 }
 .errorMessage{
   background-color: red;
