@@ -1,3 +1,11 @@
 body{
-  background-color: black
+  background-color: black;
+}
+.errorMessage{
+  background-color: red;
+  color: white;
+}
+.confMsg{
+  background-color: green;
+  color: white;
 }

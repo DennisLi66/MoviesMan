@@ -3,8 +3,8 @@ const express = require("express");
 const https = require("https");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const cookieParser = require('cookie-parser'); //FIX THIS: ADD COOKIES
-const mysql = require('mysql');
+const cookieParser = require('cookie-parser'); //FIX THIS: UPDATE COOKIES ON VISITING SITES
+const mysql = require('mysql'); //FIX THIS: Maybe only open connections in functions, then close them immediately
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
 
@@ -23,7 +23,7 @@ connection.connect();
 // will need to add if authenticated later on
 
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
-app.get("/",function(req,res){ //ideally a homepage
+app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
   if (req.cookies.userData){
     console.log(req.cookies.userData.name + " is currently logged in.");
     res.render("homeIN");
@@ -33,7 +33,7 @@ app.get("/",function(req,res){ //ideally a homepage
     res.render("homeOUT");
   }
 });
-app.get("/about", function(req,res){ //server information about this site in specifities
+app.get("/about", function(req,res){ //FIX THIS TO ACTUALLY DESCRIBE THE SITE
   if (req.cookies.userData){
     console.log(req.cookies.userData.name + " is currently logged in.");
     res.render("aboutIN");
@@ -53,27 +53,23 @@ app.route("/register")
     else{res.render("register")}
   })
   .post(function(req,res){
-    //validate username and password, then create an account
-    //VALIDATION - Make sure there are no other accounts that use this email.
     var email = req.body.email;
-    var password = req.body.password;
+    var password = req.body.password; //FIX THIS: Add checking against a regex to keep password complicated
     var cPassword = req.body.cPassword;
     var username = req.body.username;
     if (cPassword !== password){ //confirmation did not match
-      res.redirect("/register"); //change to one with an error message ////////////////////FIX THIS
+      res.render("registerERROR",{errorMsg: "The passwords did not match."}); //change to one with an error message ////////////////////FIX THIS
     }
     else{
-      // console.log(req.body.email);
-      // console.log(req.body.username);
-      // console.log(req.body.password);
       var query1 = "SELECT username FROM users WHERE email = " + connection.escape(email);
       connection.query(query1,function(err,results,fields){
         if (err){
           console.log(err);
+          res.render("registerERROR",{errorMsg: err});
         }
         else{
           if (results.length > 0){
-            res.redirect("/register"); // that account already exists //////////FIX THIS TO ERROR MESSAGE
+            res.render("registerERROR",{errorMsg: "An account using that email already exists."});
           }
           else{
             var insertStatement = "INSERT INTO users (username,email,pswrd) VALUES (?, ?, ?)";
@@ -81,16 +77,16 @@ app.route("/register")
                 // Store hash in your password DB.
                 if (e2rr){
                   console.log(e2rr);
-                  res.redirect("/register");
+                  res.render("registerERROR",{errorMsg: e2rr} );
                 }
                 else{
                 connection.query(insertStatement,[username,email,hash],function(er1r,results,fields){ ///////FIX THIS ADD SALTING
                     if (er1r){
                       console.log(er1r);
-                      res.redirect("/register"); //FIX THIS TO ERROR MESSAGE
+                      res.render("registerERROR",{errorMsg: er1r});
                     }
                     else{
-                      res.redirect("/login"); ///FIX THIS TO CONFIRMATION
+                      res.render("loginREGISTRATIONCONFIRMED",{confMsg: username});
                       }
                 });
                 }
@@ -98,8 +94,7 @@ app.route("/register")
           }
         }
     })
-    }
-  });
+    }});
 app.route("/login")
   .get(function(req,res){
     if (req.cookies.userData){
@@ -110,21 +105,24 @@ app.route("/login")
   .post(function(req,res){
     var email = req.body.username;
     var password = req.body.password;
-    console.log(email);
     var sQuery = "SELECT * FROM users WHERE email = ?";
     connection.query(sQuery,[email],function(eror, results, fields){
       if (eror){
         console.log(eror);
-        res.redirect("/login");
+        res.render("loginERROR",{errorMsg: eror});
       }
       else{
         if (results.length == 0){
-          res.redirect("/login"); //FIX THIS ERROR MESSAGE
+            res.render("loginERROR",{errorMsg: "That email and password combination do not exist."});
         }
         else{
           var resPass = results[0].pswrd;
-          bcrypt.compare(password, resPass, function(err, rresult) {
-              if (rresult){
+          bcrypt.compare(password, resPass, function(err3, rresult) {
+              if (err3){
+                console.log(err3);
+                res.render("loginERROR",{errorMsg: err3})
+              }
+              else if (rresult){
                 console.log(results[0].username + " logged in.");
                 let cookieObj = {
                   name: results[0].username
@@ -134,7 +132,7 @@ app.route("/login")
               }
               else{
                 console.log("Logging in failed.")
-                res.redirect("/login");
+                res.render("loginERROR",{errorMsg: "That email and password combination do not exist."});
               }
           });
         }
@@ -169,7 +167,7 @@ app.get("/search",function(req,res){//search and search results
   console.log(req.query);
   if (req.query.length == 0){ //basic search page
       //authentication check
-      res.serve("search");
+      res.render("search");
   }
   else{
     if (req.query.title){
@@ -184,7 +182,7 @@ app.get("/search",function(req,res){//search and search results
     if (req.query.director){
       console.log(req.query.director);
     }
-    //get movie api and serve it
+    //get movie api and render it
     res.render("search");
   }
 })
