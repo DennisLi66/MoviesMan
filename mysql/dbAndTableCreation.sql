@@ -9,6 +9,12 @@ create table users(
     pswrd varchar(255) NOT NULL
 );
 
+create table forgottenPasswords(
+	userID varchar(255),
+	hashword varchar(255),
+    inserted DATE
+);
+
 -- likelist
 -- create table likeList(
 -- userID int NOT NULL
@@ -23,3 +29,4 @@ create table users(
 -- )
 
 -- select * from users
+-- select * from forgottenPasswords

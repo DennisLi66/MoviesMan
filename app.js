@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser'); //FIX THIS: UPDATE COOKIES ON VIS
 const mysql = require('mysql'); //FIX THIS: Maybe only open connections in functions, then close them immediately
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
+const randomatic = require('randomatic');
 
 const app = express();
 app.use(express.static("public"));
@@ -139,17 +140,85 @@ app.route("/login")
       }
     })
   })
-app.route("/forgot") //FIX THIS: send an email that opens a link that randomly generates and mails a new password
+app.route("/forgot")
   .get(function(req,res){
     if (req.cookies.userData){
       console.log("User is already logged in! Redirecting...")
       res.redirect("/");
     }
     else{
-      res.render("/forgot");
+      res.render("forgot");
     }
   })
-  .post(function(req,res){})
+  .post(function(req,res){
+    //FIX THIS: Need to readd some accounts since reset MYSQL
+    //FIX THIS: Need to hash the forgot password code
+    //FIX THIS: send an email that opens a link that randomly generates and mails a new password
+    var email = req.body.email;
+    var sQuery = "SELECT * FROM users WHERE email = ?";
+    connection.query(sQuery,[email],function(eror, results, fields){
+      if (eror){
+        console.log(eror);
+        res.render("forgotERR",{errorMsg: eror})
+      }
+      else if (results.length > 0){
+        var rando = randomatic('aA0',15);
+        //use nodemailer to send an email of a forgot link with that string
+        var transporter = nodemailer.createTransport({
+          service: process.env.EMAILSYS,
+          auth: {
+            user: process.env.EMAILUSER,
+            pass: process.env.EMAILPASSWORD
+          }
+        });
+        var mailOptions = {
+          from: process.env.EMAILUSER,
+          to: email,
+          subject: 'Password Recovery Link',
+          html: 'Click this link to generate a new password: <a href = ' + process.env.SITEURL + "/forgot/"
+           + rando + '>' + process.env.SITEURL + "/forgot/" + rando + '</a>'
+        };
+        transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+          res.render("forgotERR",{errorMsg: error})
+        } else {
+          console.log('Email sent: ' + info.response);
+          //use mysql to insert the string into forgotten passwords and delete it when used or after 24 hours
+          // check they arent already in the
+          var userid = results[0].userID;
+          var dStatement = "DELETE FROM forgottenPasswords WHERE userID = ?;";
+          var iStatement = "INSERT INTO forgottenPasswords (userID,hashword,inserted) VALUES (?,?,CURRENT_TIMESTAMP() )";
+
+          var connection2 = mysql.createConnection({
+            host: process.env.HOST,
+            user: process.env.USER,
+            password: process.env.PASSWORD,
+            database: process.env.DATABASE,
+            multipleStatements: true})
+          connection2.connect();
+
+          bcrypt.hash(rando, 10, function(e2rr, hash){
+          connection2.query(dStatement + iStatement,[userid,userid,hash],function(rre,sser,fieds){
+            if (rre){
+              console.log(rre);
+              res.render("forgotERR",{errorMsg:rre});
+            }
+            else{
+              console.log("Insertion Done.")
+              res.render("forgotCONF",{confMsg: email})
+            }
+          });
+          })
+
+        }
+      });
+      }
+      else{
+        res.render("forgotERR",{errorMsg: "There are no accounts with that email."})
+      }
+    });
+  })
 app.get("/logout",function(req,res){
   if (req.cookies.userData){
     var username = req.cookies.userData.name;
