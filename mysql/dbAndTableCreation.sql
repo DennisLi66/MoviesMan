@@ -9,18 +9,21 @@ create table users(
     pswrd varchar(255) NOT NULL
 );
 
+
+
 create table forgottenPasswords(
-	userID varchar(255),
-	hashword varchar(255),
+	email varchar(255),
+	recoveryLink varchar(255),
     inserted DATE
 );
 
+
+-- //drop table forgottenPasswords; 
 -- likelist
 -- create table likeList(
 -- userID int NOT NULL
 --  ,movieID  --figure out what data type a movieID is
 -- );
-
 -- ratings
 -- create table ratingsList(
 -- userID int NOT NULL,

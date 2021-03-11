@@ -102,7 +102,8 @@ app.route("/login")
       console.log("User is already logged in! Redirecting...")
       res.redirect("/");
     }
-    else{res.render("login")}})
+    else{res.render("login")}
+  })
   .post(function(req,res){
     var email = req.body.username;
     var password = req.body.password;
@@ -151,9 +152,6 @@ app.route("/forgot")
     }
   })
   .post(function(req,res){
-    //FIX THIS: Need to readd some accounts since reset MYSQL
-    //FIX THIS: Need to hash the forgot password code
-    //FIX THIS: send an email that opens a link that randomly generates and mails a new password
     var email = req.body.email;
     var sQuery = "SELECT * FROM users WHERE email = ?";
     connection.query(sQuery,[email],function(eror, results, fields){
@@ -163,7 +161,6 @@ app.route("/forgot")
       }
       else if (results.length > 0){
         var rando = randomatic('aA0',15);
-        //use nodemailer to send an email of a forgot link with that string
         var transporter = nodemailer.createTransport({
           service: process.env.EMAILSYS,
           auth: {
@@ -184,12 +181,8 @@ app.route("/forgot")
           res.render("forgotERR",{errorMsg: error})
         } else {
           console.log('Email sent: ' + info.response);
-          //use mysql to insert the string into forgotten passwords and delete it when used or after 24 hours
-          // check they arent already in the
-          var userid = results[0].userID;
-          var dStatement = "DELETE FROM forgottenPasswords WHERE userID = ?;";
-          var iStatement = "INSERT INTO forgottenPasswords (userID,hashword,inserted) VALUES (?,?,CURRENT_TIMESTAMP() )";
-
+          var dStatement = "DELETE FROM forgottenPasswords WHERE email = ?;";
+          var iStatement = "INSERT INTO forgottenPasswords (email,recoveryLink,inserted) VALUES (?,?,CURRENT_TIMESTAMP() )";
           var connection2 = mysql.createConnection({
             host: process.env.HOST,
             user: process.env.USER,
@@ -197,20 +190,18 @@ app.route("/forgot")
             database: process.env.DATABASE,
             multipleStatements: true})
           connection2.connect();
-
-          bcrypt.hash(rando, 10, function(e2rr, hash){
-          connection2.query(dStatement + iStatement,[userid,userid,hash],function(rre,sser,fieds){
+          connection2.query(dStatement + iStatement,[email,email,rando],function(rre,sser,fieds){
             if (rre){
               console.log(rre);
               res.render("forgotERR",{errorMsg:rre});
+                            connection2.end();
             }
             else{
               console.log("Insertion Done.")
-              res.render("forgotCONF",{confMsg: email})
+              res.render("forgotCONF",{confMsg: email});
+                            connection2.end();
             }
           });
-          })
-
         }
       });
       }
@@ -219,6 +210,51 @@ app.route("/forgot")
       }
     });
   })
+app.get("/forgot/:linkID",function(req,res){
+  if (req.cookies.userData){
+    console.log("User is already logged in! Redirecting...")
+    res.serve("/forgotERR",{errorMsg: "You're already logged in! You don't need to change a password."});
+  }
+  else{
+    var linkID = req.params.linkID;
+    var sQuery = "SELECT * FROM forgottenPasswords WHERE recoveryLink = ?";
+    connection.query(sQuery,[email],function(errr,resu,fields){
+      if (errr){
+        console.log(errr);
+        res.render("forgotERR",{errorMsg:errr});
+      }
+      else if (resu.length == 0){
+        res.render("forgotERR",{errorMsg:"That is not a valid recovery link."});
+      }
+      else{
+        var newPass = randomatic("Aa0",12);
+        var sendMail = resu[0].email;
+        fQuery = "DELETE FROM forgottenPasswords WHERE email = ?;"
+        var connection2 = mysql.createConnection({
+          host: process.env.HOST,
+          user: process.env.USER,
+          password: process.env.PASSWORD,
+          database: process.env.DATABASE,
+          multipleStatements: true});
+        connection2.connect();
+        bcrypt.hash(password, 10, function(e2rr, hash) {
+          if (e2rr){
+            console.log(e2rr);
+            res.render("forgotERR",{errorMsg: e2rr})
+          }
+          else{
+          connection2.query(fQuery,[sendMail,hash,sendMail],function(er12,rree,fulds){
+            if (er12){
+              connection2.close();
+              console.log(er12);
+              res.render(forgotERR,{errorMsg: er12});
+            }
+            else{
+              connection2.close();
+              res.render('changePassword',{eml:sendMail});
+            }
+          })
+}});}})}})
 app.get("/logout",function(req,res){
   if (req.cookies.userData){
     var username = req.cookies.userData.name;
@@ -290,6 +326,7 @@ app.get("/profile/:username",function(req,res){
     res.render('profileOUT',{profuser: profUser})
   }
 })
+app.get("/changePassword",function(req,res){})
 
 app.listen(3000,function(){
   console.log("Server Started.")
