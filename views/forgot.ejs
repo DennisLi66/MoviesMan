@@ -1,6 +1,8 @@
 <%- include('partials/header') %>
 <!-- Should probably show recent / recent popular movies -->
-<%- include('partials/loggoutnavbar') %>
+<%- include('partials/navbar') %>
+<div class="confMsg" <%= confHidden %>> We have sent an email to <%= confMsg %>. </div>
+<div class="errorMessage" <%= errHidden %> ><%= errorMsg %></div>
 <h4> Please enter the email of the user to send a recovery email to. </h4>
 <form action="/forgot" method="POST">
     <label for="email">Email</label>

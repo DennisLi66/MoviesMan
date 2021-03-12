@@ -164,7 +164,7 @@ app.route("/forgot")
       res.redirect("/");
     }
     else{
-      res.render("forgot");
+        res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'hidden',errorMsg: ''})
     }
   })
   .post(function(req,res){
@@ -173,7 +173,7 @@ app.route("/forgot")
     connection.query(sQuery,[email],function(eror, results, fields){
       if (eror){
         console.log(eror);
-        res.render("forgotERR",{errorMsg: eror})
+        res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'',errorMsg: eror})
       }
       else if (results.length > 0){
         var rando = randomatic('aA0',15);
@@ -194,7 +194,7 @@ app.route("/forgot")
         transporter.sendMail(mailOptions, function(error, info){
         if (error) {
           console.log(error);
-          res.render("forgotERR",{errorMsg: error})
+        res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'',errorMsg: error})
         } else {
           console.log('Email sent: ' + info.response);
           var dStatement = "DELETE FROM forgottenPasswords WHERE email = ?;";
@@ -209,12 +209,12 @@ app.route("/forgot")
           connection2.query(dStatement + iStatement,[email,email,rando],function(rre,sser,fieds){
             if (rre){
               console.log(rre);
-              res.render("forgotERR",{errorMsg:rre});
-                            connection2.end();
+              res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'',errorMsg: rre})
+              connection2.end();
             }
             else{
               console.log("Insertion Done.")
-              res.render("forgotCONF",{confMsg: email});
+              res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'',confMsg:'email',errHidden:'hidden',errorMsg: ''})
               connection2.end();
             }
           });
@@ -222,7 +222,7 @@ app.route("/forgot")
       });
       }
       else{
-        res.render("forgotERR",{errorMsg: "There are no accounts with that email."})
+        res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'',errorMsg: "There are no accounts with that email."})
       }
     });
   })
@@ -237,10 +237,10 @@ app.get("/forgot/:linkID",function(req,res){
     connection.query(sQuery,[linkID],function(errr,resu,fields){
       if (errr){
         console.log(errr);
-        res.render("forgotERR",{errorMsg:errr});
+        res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'',errorMsg: errr})
       }
       else if (resu.length == 0){
-        res.render("forgotERR",{errorMsg:"That is not a valid recovery link."});
+        res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'',errorMsg: 'That is not a valid recovery link.'})
       }
       else{
         var newPass = randomatic("Aa0",12);
