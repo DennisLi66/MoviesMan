@@ -30,16 +30,16 @@ app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
     if (req.cookies.temporary){
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
-      res.render("homeOUT");
+      res.render("home",{hiddenOUT: 'hidden', hiddenIN: ''});
     }
     else{
       console.log(req.cookies.userData.name + " is currently logged in.");
-      res.render("homeIN");
+      res.render("home",{hiddenIN: 'hidden', hiddenOUT: ''});
     }
   }
   else{
     console.log("Anon User");
-    res.render("homeOUT");
+    res.render("home",{hiddenOUT: 'hidden', hiddenIN: ''});
   }
 });
 app.get("/about", function(req,res){ //FIX THIS TO ACTUALLY DESCRIBE THE SITE
@@ -261,7 +261,7 @@ app.get("/forgot/:linkID",function(req,res){
                 temporary: true
               }
               res.cookie("userData",cookieObj,{expires:new Date(5000 + Date.now())});
-              res.render('changePasswordIN',{hiddenError: 'hidden', hiddenConfirm: 'hidden', errorMsg: '', eml:sendMail});
+              res.render('changePassword',{hiddenError: 'hidden', hiddenConfirm: 'hidden', errorMsg: '', eml:sendMail});
             }
           });}})}})
 app.get("/logout",function(req,res){
@@ -340,7 +340,7 @@ app.route("/changePassword")
     if (req.cookies.userData){
       console.log(req.cookies.userData.name + " is currently logged in.");
       // fetch Email
-      res.render("changePasswordIN",{hiddenError: 'hidden', hiddenConfirm: 'hidden', errorMsg: '', eml:req.cookies.userData.email});
+      res.render("changePassword",{hiddenError: 'hidden', hiddenConfirm: 'hidden', errorMsg: '', eml:req.cookies.userData.email});
     }
     else{
       console.log("User is not logged in. Redirecting...");
@@ -354,16 +354,16 @@ app.route("/changePassword")
       var cPass = req.body.cpassword;
       var sQuery = "UPDATE users SET pswrd = ? WHERE email = ?";
       if (pass !== cPass){
-        res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: 'Your passwords did not match.', eml:email})
+        res.render("changePassword",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: 'Your passwords did not match.', eml:email})
       }
       else{bcrypt.hash(pass, 10, function(e2rr, hash){
           if (e2rr){
-            res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: e2rr, eml:email});
+            res.render("changePassword",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: e2rr, eml:email});
           }
           else{
             connection.query(sQuery,[hash,email],function(err,results){
           if (err){
-            res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: '', eml:email})
+            res.render("changePassword",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: '', eml:email})
           }
           else {
             var transporter = nodemailer.createTransport({
@@ -381,7 +381,7 @@ app.route("/changePassword")
             };
             transporter.sendMail(mailOptions, function(error, info){
               if (error){
-                res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: error, eml:email});
+                res.render("changePassword",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: error, eml:email});
               }
               else{
                 res.redirect("/");
