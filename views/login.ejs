@@ -1,7 +1,8 @@
 <%- include('partials/header') %>
 <!-- Should probably show recent / recent popular movies -->
-<%- include('partials/loggoutnavbar') %>
-
+<%- include('partials/navbar') %>
+<div class="errorMessage"<%= errHidden %>><%= errorMsg %></div>
+<div class="confMsg"<%= confHidden %> ><%= confMsg %> has now been registered! </div>
 <form action="/login" method="POST">
     <label for="email">Email</label>
     <input type="email" name="username" required>
@@ -9,5 +10,5 @@
     <input type="password" name="password" required>
   <button type="submit" class="btn btn-dark">Login</button>
 </form>
-
+<a href="/forgot"> Forgot Your Password? </a>
 <%- include('partials/footer') %>

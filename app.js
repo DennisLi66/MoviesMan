@@ -101,7 +101,7 @@ app.route("/register")
                       res.render("registerERROR",{errorMsg: er1r});
                     }
                     else{
-                      res.render("loginREGISTRATIONCONFIRMED",{confMsg: username});
+                      res.render("login",{errorMsg:'',hiddenOUT: 'hidden',hiddenIN:'',confMsg: username,errHidden:'hidden',confHidden:''})
                       }
                 });
                 }
@@ -116,7 +116,7 @@ app.route("/login")
       console.log("User is already logged in! Redirecting...")
       res.redirect("/");
     }
-    else{res.render("login")}
+    else{res.render("login",{errorMsg:'',hiddenOUT: 'hidden',hiddenIN:'',confMsg: '',errHidden:'hidden',confHidden:'hidden'})}
   })
   .post(function(req,res){
     var email = req.body.username;
@@ -125,18 +125,19 @@ app.route("/login")
     connection.query(sQuery,[email],function(eror, results, fields){
       if (eror){
         console.log(eror);
-        res.render("loginERROR",{errorMsg: eror});
+        res.render("login",{errorMsg:eror,hiddenOUT: 'hidden',hiddenIN:'',confMsg: '',errHidden:'',confHidden:'hidden'})
       }
       else{
         if (results.length == 0){
-            res.render("loginERROR",{errorMsg: "That email and password combination do not exist."});
+            res.render("login",{errorMsg:'That email and password combination do not exist.',hiddenOUT: 'hidden',hiddenIN:'',confMsg: '',errHidden:'',confHidden:'hidden'})
         }
         else{
           var resPass = results[0].pswrd;
           bcrypt.compare(password, resPass, function(err3, rresult) {
               if (err3){
                 console.log(err3);
-                res.render("loginERROR",{errorMsg: err3})
+                res.render("login",{errorMsg:err3,hiddenOUT: 'hidden',hiddenIN:'',confMsg: '',errHidden:'',confHidden:'hidden'})
+
               }
               else if (rresult){
                 console.log(results[0].username + " logged in.");
@@ -150,7 +151,8 @@ app.route("/login")
               }
               else{
                 console.log("Logging in failed.")
-                res.render("loginERROR",{errorMsg: "That email and password combination do not exist."});
+                res.render("login",{errorMsg:'That email and password combination do not exist."',hiddenOUT: 'hidden',hiddenIN:'',confMsg: '',errHidden:'',confHidden:'hidden'})
+
               }
           });
         }
