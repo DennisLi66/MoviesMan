@@ -44,12 +44,18 @@ app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
 });
 app.get("/about", function(req,res){ //FIX THIS TO ACTUALLY DESCRIBE THE SITE
   if (req.cookies.userData){
-    console.log(req.cookies.userData.name + " is currently logged in.");
-    res.render("aboutIN");
+    if (req.cookies.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      res.render("about",{hiddenOUT: 'hidden', hiddenIN: ''});
+    }
+    else{
+      console.log(req.cookies.userData.name + " is currently logged in.");
+      res.render("about",{hiddenOUT: 'hidden', hiddenIN: ''});}
   }
   else{
     console.log("Anon User");
-    res.render("aboutOUT");
+    res.render("about",{hiddenOUT: '', hiddenIN: 'hidden'});
   }
 });
 // Registration and Login
