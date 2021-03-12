@@ -127,7 +127,8 @@ app.route("/login")
               else if (rresult){
                 console.log(results[0].username + " logged in.");
                 let cookieObj = {
-                  name: results[0].username
+                  name: results[0].username,
+                  email: results[0].email
                 }
                 res.cookie("userData",cookieObj,{expires:new Date(5000 + Date.now())}); //FIX THIS INTO LONGER TIME BASED COOKIE
                 res.redirect("/");
@@ -251,7 +252,7 @@ app.get("/forgot/:linkID",function(req,res){
             }
             else{
               connection2.close();
-              res.render('changePassword',{eml:sendMail});
+              res.render('changePasswordOUT',{hiddenError: 'hidden', hiddenConfirm: 'hidden', eml:sendMail});
             }
           })
 }});}})}})
@@ -326,8 +327,19 @@ app.get("/profile/:username",function(req,res){
     res.render('profileOUT',{profuser: profUser})
   }
 })
-app.get("/changePassword",function(req,res){})
-
+app.route("/changePassword")
+  .get(function(req,res){
+    if (req.cookies.userData){
+      console.log(req.cookies.userData.name + " is currently logged in.");
+      // fetch Email
+      res.render("changePasswordIN",{hiddenError: 'hidden', hiddenConfirm: 'hidden',eml:req.cookies.userData.email});
+    }
+    else{
+      console.log("User is not logged in. Redirecting...");
+      res.redirect("/");
+    }
+  })
+  .post()
 app.listen(3000,function(){
   console.log("Server Started.")
 });
