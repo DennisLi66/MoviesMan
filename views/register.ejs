@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 <!-- Should probably show recent / recent popular movies -->
-<%- include('partials/loggoutnavbar') %>
-
+<%- include('partials/navbar') %>
+<div class="errorMessage" <%= errHidden %>><%= errorMsg %></div>
 <form action="/register" method="POST">
     <label for="email">Email</label>
     <input type="email" name="email" required>

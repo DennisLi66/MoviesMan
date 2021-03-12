@@ -51,11 +51,11 @@ app.get("/about", function(req,res){ //FIX THIS TO ACTUALLY DESCRIBE THE SITE
     }
     else{
       console.log(req.cookies.userData.name + " is currently logged in.");
-      res.render("about",{hiddenOUT: 'hidden', hiddenIN: ''});}
+      res.render("about",{hiddenOUT: '', hiddenIN: 'hidden'});}
   }
   else{
     console.log("Anon User");
-    res.render("about",{hiddenOUT: '', hiddenIN: 'hidden'});
+    res.render("about",{hiddenOUT: 'hidden', hiddenIN: ''});
   }
 });
 // Registration and Login
@@ -65,7 +65,9 @@ app.route("/register")
       console.log("User is already logged in! Redirecting...")
       res.redirect("/");
     }
-    else{res.render("register")}
+    else{
+      res.render("register",{errorMsg:'', hiddenOUT: 'hidden',hiddenIN:'',errHidden:'hidden'});
+  }
   })
   .post(function(req,res){
     var email = req.body.email;
@@ -73,18 +75,18 @@ app.route("/register")
     var cPassword = req.body.cPassword;
     var username = req.body.username;
     if (cPassword !== password){ //confirmation did not match
-      res.render("registerERROR",{errorMsg: "The passwords did not match."}); //change to one with an error message ////////////////////FIX THIS
+      res.render("register",{errorMsg:"The passwords did not match.", hiddenOUT: 'hidden',hiddenIN:'',errHidden:''});
     }
     else{
       var query1 = "SELECT username FROM users WHERE email = " + connection.escape(email);
       connection.query(query1,function(err,results,fields){
         if (err){
           console.log(err);
-          res.render("registerERROR",{errorMsg: err});
+          res.render("register",{errorMsg:err, hiddenOUT: 'hidden',hiddenIN:'',errHidden:''});
         }
         else{
           if (results.length > 0){
-            res.render("registerERROR",{errorMsg: "An account using that email already exists."});
+            res.render("register",{errorMsg:"An account using that email already exists.",hiddenOUT: 'hidden',hiddenIN:'',errHidden:''});
           }
           else{
             var insertStatement = "INSERT INTO users (username,email,pswrd) VALUES (?, ?, ?)";
@@ -92,13 +94,13 @@ app.route("/register")
                 // Store hash in your password DB.
                 if (e2rr){
                   console.log(e2rr);
-                  res.render("registerERROR",{errorMsg: e2rr} );
+                  res.render("register",{errorMsg:e2rr,hiddenOUT: 'hidden',hiddenIN:'',errHidden:''});
                 }
                 else{
                 connection.query(insertStatement,[username,email,hash],function(er1r,results,fields){ ///////FIX THIS ADD SALTING
                     if (er1r){
                       console.log(er1r);
-                      res.render("registerERROR",{errorMsg: er1r});
+                      res.render("register",{errorMsg:er1r, hiddenOUT: 'hidden',hiddenIN:'',errHidden:''});
                     }
                     else{
                       res.render("login",{errorMsg:'',hiddenOUT: 'hidden',hiddenIN:'',confMsg: username,errHidden:'hidden',confHidden:''})
