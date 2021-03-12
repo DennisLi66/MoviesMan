@@ -9,8 +9,6 @@ create table users(
     pswrd varchar(255) NOT NULL
 );
 
-
-
 create table forgottenPasswords(
 	email varchar(255),
 	recoveryLink varchar(255),

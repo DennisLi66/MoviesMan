@@ -23,11 +23,19 @@ connection.connect();
 //can render between a logged in version and a logged out version
 // will need to add if authenticated later on
 
+//FIX THIS: KILL TEMPOARY COOKIES
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
   if (req.cookies.userData){
-    console.log(req.cookies.userData.name + " is currently logged in.");
-    res.render("homeIN");
+    if (req.cookies.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      res.render("homeOUT");
+    }
+    else{
+      console.log(req.cookies.userData.name + " is currently logged in.");
+      res.render("homeIN");
+    }
   }
   else{
     console.log("Anon User");
@@ -128,7 +136,8 @@ app.route("/login")
                 console.log(results[0].username + " logged in.");
                 let cookieObj = {
                   name: results[0].username,
-                  email: results[0].email
+                  email: results[0].email,
+                  temporary: false
                 }
                 res.cookie("userData",cookieObj,{expires:new Date(5000 + Date.now())}); //FIX THIS INTO LONGER TIME BASED COOKIE
                 res.redirect("/");
@@ -200,7 +209,7 @@ app.route("/forgot")
             else{
               console.log("Insertion Done.")
               res.render("forgotCONF",{confMsg: email});
-                            connection2.end();
+              connection2.end();
             }
           });
         }
@@ -219,7 +228,7 @@ app.get("/forgot/:linkID",function(req,res){
   else{
     var linkID = req.params.linkID;
     var sQuery = "SELECT * FROM forgottenPasswords WHERE recoveryLink = ?";
-    connection.query(sQuery,[email],function(errr,resu,fields){
+    connection.query(sQuery,[linkID],function(errr,resu,fields){
       if (errr){
         console.log(errr);
         res.render("forgotERR",{errorMsg:errr});
@@ -238,24 +247,23 @@ app.get("/forgot/:linkID",function(req,res){
           database: process.env.DATABASE,
           multipleStatements: true});
         connection2.connect();
-        bcrypt.hash(password, 10, function(e2rr, hash) {
-          if (e2rr){
-            console.log(e2rr);
-            res.render("forgotERR",{errorMsg: e2rr})
-          }
-          else{
-          connection2.query(fQuery,[sendMail,hash,sendMail],function(er12,rree,fulds){
+        connection2.query(fQuery,[sendMail],function(er12,rree,fulds){
             if (er12){
-              connection2.close();
+              connection2.end();
               console.log(er12);
               res.render(forgotERR,{errorMsg: er12});
             }
             else{
-              connection2.close();
-              res.render('changePasswordOUT',{hiddenError: 'hidden', hiddenConfirm: 'hidden', eml:sendMail});
+              connection2.end();
+              let cookieObj = {
+                name: '',
+                email: resu[0].email,
+                temporary: true
+              }
+              res.cookie("userData",cookieObj,{expires:new Date(5000 + Date.now())});
+              res.render('changePasswordIN',{hiddenError: 'hidden', hiddenConfirm: 'hidden', errorMsg: '', eml:sendMail});
             }
-          })
-}});}})}})
+          });}})}})
 app.get("/logout",function(req,res){
   if (req.cookies.userData){
     var username = req.cookies.userData.name;
@@ -332,14 +340,60 @@ app.route("/changePassword")
     if (req.cookies.userData){
       console.log(req.cookies.userData.name + " is currently logged in.");
       // fetch Email
-      res.render("changePasswordIN",{hiddenError: 'hidden', hiddenConfirm: 'hidden',eml:req.cookies.userData.email});
+      res.render("changePasswordIN",{hiddenError: 'hidden', hiddenConfirm: 'hidden', errorMsg: '', eml:req.cookies.userData.email});
     }
     else{
       console.log("User is not logged in. Redirecting...");
       res.redirect("/");
     }
   })
-  .post()
+  .post(function(req,res){ //send confirmation mail
+    if (req.cookies.userData){
+      var email = req.body.email;
+      var pass = req.body.password;
+      var cPass = req.body.cpassword;
+      var sQuery = "UPDATE users SET pswrd = ? WHERE email = ?";
+      if (pass !== cPass){
+        res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: 'Your passwords did not match.', eml:email})
+      }
+      else{bcrypt.hash(pass, 10, function(e2rr, hash){
+          if (e2rr){
+            res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: e2rr, eml:email});
+          }
+          else{
+            connection.query(sQuery,[hash,email],function(err,results){
+          if (err){
+            res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: '', eml:email})
+          }
+          else {
+            var transporter = nodemailer.createTransport({
+              service: process.env.EMAILSYS,
+              auth: {
+                user: process.env.EMAILUSER,
+                pass: process.env.EMAILPASSWORD
+              }
+            });
+            var mailOptions = {
+              from: process.env.EMAILUSER,
+              to: email,
+              subject: 'Your password was recently changed.',
+              html: "Your password was recently changed."
+            };
+            transporter.sendMail(mailOptions, function(error, info){
+              if (error){
+                res.render("changePasswordIN",{hiddenError: '', hiddenConfirm: 'hidden', errorMsg: error, eml:email});
+              }
+              else{
+                res.redirect("/");
+              }});
+        }
+        })
+      }
+    })};
+    }
+    else{
+      res.redirect("/");
+    }})
 app.listen(3000,function(){
   console.log("Server Started.")
 });
