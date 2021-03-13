@@ -62,13 +62,19 @@ app.get("/about", function(req,res){ //FIX THIS TO ACTUALLY DESCRIBE THE SITE
 app.route("/register")
   .get(function(req,res){
     if (req.cookies.userData){
-      console.log("User is already logged in! Redirecting...")
-      res.redirect("/");
+      if (req.cookies.temporary){
+        res.clearCookie('userData');
+        console.log(username + " has been logged out.");
+        res.render("register",{errorMsg:'', hiddenOUT: 'hidden',hiddenIN:'',errHidden:'hidden'});
+      }
+      else{
+        console.log("User is already logged in! Redirecting...")
+        res.redirect("/");
     }
+  }
     else{
       res.render("register",{errorMsg:'', hiddenOUT: 'hidden',hiddenIN:'',errHidden:'hidden'});
-  }
-  })
+        }})
   .post(function(req,res){
     var email = req.body.email;
     var password = req.body.password; //FIX THIS: Add checking against a regex to keep password complicated
@@ -291,7 +297,7 @@ app.get("/search",function(req,res){//search and search results
   console.log(req.query);
   if (req.query.length == 0){ //basic search page
       //authentication check
-      res.render("search");
+
   }
   else{
     if (req.query.title){
@@ -307,7 +313,7 @@ app.get("/search",function(req,res){//search and search results
       console.log(req.query.director);
     }
     //get movie api and render it
-    res.render("search");
+
   }
 })
 // Movie Page - IMDB Information, Reviews
