@@ -8,6 +8,7 @@ const mysql = require('mysql'); //FIX THIS: Maybe only open connections in funct
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
 const randomatic = require('randomatic');
+const imdb = require('imdb-api');
 
 const app = express();
 app.use(express.static("public"));
@@ -20,9 +21,6 @@ var connection = mysql.createConnection({
   password: process.env.PASSWORD,
   database: process.env.DATABASE})
 connection.connect();
-//can render between a logged in version and a logged out version
-// will need to add if authenticated later on
-
 //FIX THIS: KILL TEMPOARY COOKIES
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
@@ -170,8 +168,16 @@ app.route("/login")
 app.route("/forgot")
   .get(function(req,res){
     if (req.cookies.userData){
+      if (req.cookies.temporary){
+        res.clearCookie('userData');
+        console.log(username + " has been logged out.");
+        res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'hidden',errorMsg: ''})
+
+      }
+      else{
       console.log("User is already logged in! Redirecting...")
       res.redirect("/");
+      }
     }
     else{
         res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'hidden',errorMsg: ''})
@@ -320,14 +326,22 @@ app.get("/search",function(req,res){//search and search results
 app.get("/movie",function(req,res){ //redirect?
   res.redirect("/search");
 })
-app.get("/movie/:movieTitle",function(req,res){
+app.get("/movie/:movieid",function(req,res){
 
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
   if (req.cookies.userData){
-    var username = req.cookies.userData.name;
-    res.redirect("/profile/" + username);
+    if (req.cookies.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      console.log("User isn't even logged in! Redirecting...");
+      res.redirect("/");
+    }
+    else{
+      var username = req.cookies.userData.name;
+      res.redirect("/profile/" + username);
+    }
   }
   else{
     console.log("User isn't even logged in! Redirecting...");
@@ -337,18 +351,21 @@ app.get("/profile",function(req,res){ //go to user's specfic profile, or redirec
 app.get("/profile/:username",function(req,res){
   // FIX THIS: CSS NOT WORKING
   // FIX THIS: PREVENT BOGUS PROFILE NAMES
+  // FIX THIS: Add hiddenOwner
+  //FIX THIS: to add this feature profile usernames must be unique
+  //FIX THIS: Probably only have a list of movies user is interested in
   var profUser = req.params.username;
   if (req.cookies.userData){
     var username = req.cookies.userData.name;
     if (username === profUser){
-      res.render('profileOWNER',{profuser: profUser});
+      res.render('profile',{hiddenIN: 'hidden', hiddenOUT: '', profuser: profUser});
     }
     else{
-      res.render('profileIN',{profuser: profUser})
+      res.render('profile',{hiddenIN: 'hidden', hiddenOUT: '', profuser: profUser})
     }
   }
   else{
-    res.render('profileOUT',{profuser: profUser})
+    res.render('profile',{hiddenIN: '', hiddenOUT: 'hidden', profuser: profUser})
   }
 })
 app.route("/changePassword")
@@ -410,6 +427,9 @@ app.route("/changePassword")
     else{
       res.redirect("/");
     }})
+app.get("/test",function(req,res){
+  imdb.get({id: 'tt0090190'}, {apiKey: process.env.OMDBAPI}).then(console.log);
+})
 app.listen(3000,function(){
   console.log("Server Started.")
 });
