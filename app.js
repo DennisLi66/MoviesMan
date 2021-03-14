@@ -27,7 +27,7 @@ connection.connect(); //FIX THIS MOVE CONNECTIONS TO INSIDE SQL CALLS
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
   if (req.cookies.userData){
-    if (req.cookies.temporary){
+    if (req.cookies.userData.temporary){
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
       res.render("home",{hiddenOUT: 'hidden', hiddenIN: ''});
@@ -44,7 +44,7 @@ app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
 });
 app.get("/about", function(req,res){ //FIX THIS TO ACTUALLY DESCRIBE THE SITE
   if (req.cookies.userData){
-    if (req.cookies.temporary){
+    if (req.cookies.userData.temporary){
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
       res.render("about",{hiddenOUT: 'hidden', hiddenIN: ''});
@@ -62,7 +62,7 @@ app.get("/about", function(req,res){ //FIX THIS TO ACTUALLY DESCRIBE THE SITE
 app.route("/register")
   .get(function(req,res){
     if (req.cookies.userData){
-      if (req.cookies.temporary){
+      if (req.cookies.userData.temporary){
         res.clearCookie('userData');
         console.log(username + " has been logged out.");
         res.render("register",{errorMsg:'', hiddenOUT: 'hidden',hiddenIN:'',errHidden:'hidden'});
@@ -170,7 +170,7 @@ app.route("/login")
 app.route("/forgot")
   .get(function(req,res){
     if (req.cookies.userData){
-      if (req.cookies.temporary){
+      if (req.cookies.userData.temporary){
         res.clearCookie('userData');
         console.log(username + " has been logged out.");
         res.render("forgot",{hiddenOUT: 'hidden',hiddenIN:'',confHidden:'hidden',confMsg:'',errHidden:'hidden',errorMsg: ''})
@@ -303,26 +303,33 @@ app.get("/logout",function(req,res){
 // Search Information
 app.get("/search",function(req,res){//search and search results
   console.log(req.query);
+  var hiddenOUT = "";
+  var hiddenIN = "";
+  if (req.cookies.userData){
+    if (req.cookies.userDate.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      hiddenOUT = "hidden";
+    }
+    else{
+      hiddenIN = "hidden";
+    }
+  }
+  else{
+    hiddenOUT = "hidden";
+  }
   if (req.query.length == 0){ //basic search page
-      //authentication check
-
+      //do nothing
   }
   else{
     if (req.query.title){
       console.log(req.query.title);
     }
-    if (req.query.year){
-      console.log(req.query.year);
+    else{
+      //do nothing
     }
-    if (req.query.act){
-      console.log(req.query.act);
-    }
-    if (req.query.director){
-      console.log(req.query.director);
-    }
-    //get movie api and render it
-
   }
+  res.render("search",{hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
 })
 // Movie Page - IMDB Information, Reviews
 app.get("/movie",function(req,res){ //redirect?
@@ -332,22 +339,26 @@ app.get("/movie/:movieid",function(req,res){
   //perform OMDB Query for movie title
   //if there are multiple of a movie forward to movies endpoint
   //allow users to rate movies
+  //metacritic link is ez: https://www.metacritic.com/movie/the-toxic-avenger
+  //rotten tomatoes link is ez: https://www.rottentomatoes.com/m/toxic_avenger
   var jsonMovie;
   imdb.get({id: 'tt0090190'}, {apiKey: process.env.OMDBAPI})
     .then(function(x){
-      console.log(x);
+      // console.log(x);
       jsonMovie = x;
       var movieTitle = jsonMovie.title;
+      var releaseYear = jsonMovie.year;
       var movieId = req.params.movieid;
       var poster = jsonMovie.poster;
       var movieRating = jsonMovie.rated;
-      res.render("movie",{movieTitle:movieTitle,moviePoster:poster,hiddenOUT:'hidden',hiddenIN:''})
+      var plot = jsonMovie.plot;
+      res.render("movie",{movieTitle:movieTitle, moviePlot: plot, movieRating: movieRating,moviePoster:poster,hiddenOUT:'hidden',hiddenIN:''})
     })
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
   if (req.cookies.userData){
-    if (req.cookies.temporary){
+    if (req.cookies.userData.temporary){
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
       console.log("User isn't even logged in! Redirecting...");
@@ -364,7 +375,6 @@ app.get("/profile",function(req,res){ //go to user's specfic profile, or redirec
   }
 })
 app.get("/profile/:username",function(req,res){
-  // FIX THIS: CSS NOT WORKING
   // FIX THIS: PREVENT BOGUS PROFILE NAMES
   // FIX THIS: Add hiddenOwner
   //FIX THIS: to add this feature profile usernames must be unique
