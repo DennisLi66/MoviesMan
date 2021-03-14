@@ -10,6 +10,8 @@ const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
 const randomatic = require('randomatic');
 const imdb = require('imdb-api');
 
+//FIX THIS - ADD MOST LIKED MOVIES, MOST HIGHLY RATED AMONG USERS
+
 const app = express();
 app.use(express.static("public"));
 app.set('view engine','ejs');
@@ -20,7 +22,7 @@ var connection = mysql.createConnection({
   user: process.env.USER,
   password: process.env.PASSWORD,
   database: process.env.DATABASE})
-connection.connect();
+connection.connect(); //FIX THIS MOVE CONNECTIONS TO INSIDE SQL CALLS
 //FIX THIS: KILL TEMPOARY COOKIES
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/",function(req,res){ //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
@@ -327,7 +329,20 @@ app.get("/movie",function(req,res){ //redirect?
   res.redirect("/search");
 })
 app.get("/movie/:movieid",function(req,res){
-
+  //perform OMDB Query for movie title
+  //if there are multiple of a movie forward to movies endpoint
+  //allow users to rate movies
+  var jsonMovie;
+  imdb.get({id: 'tt0090190'}, {apiKey: process.env.OMDBAPI})
+    .then(function(x){
+      console.log(x);
+      jsonMovie = x;
+      var movieTitle = jsonMovie.title;
+      var movieId = req.params.movieid;
+      var poster = jsonMovie.poster;
+      var movieRating = jsonMovie.rated;
+      res.render("movie",{movieTitle:movieTitle,moviePoster:poster,hiddenOUT:'hidden',hiddenIN:''})
+    })
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
