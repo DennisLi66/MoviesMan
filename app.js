@@ -323,6 +323,7 @@ app.get("/search",function(req,res){//search and search results
   }
   else{
     if (req.query.title){
+      //convert title to its corresponding id
       console.log(req.query.title);
     }
     else{

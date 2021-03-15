@@ -2,4 +2,9 @@
 <!-- Should probably show recent / recent popular movies -->
 <%- include('partials/navbar') %>
 <h1> Search Page </h1>
+<form action="/search" method="GET">
+    <label for="title">Name of Movie:</label>
+    <input type="input" name="title" required>
+  <button type="submit" class="btn btn-dark">Submit</button>
+</form>
 <%- include('partials/footer') %>
