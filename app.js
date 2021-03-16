@@ -319,18 +319,31 @@ app.get("/search",function(req,res){//search and search results
     hiddenOUT = "hidden";
   }
   if (req.query.length == 0){ //basic search page
-      //do nothing
+      res.render("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
   }
   else{
     if (req.query.title){
       //convert title to its corresponding id
       console.log(req.query.title);
+      var ttle = req.query.title;
+      imdb.search({name: ttle},{apiKey:process.env.OMDBAPI}).then(function(x){
+        var serched = x.results;
+        console.log(serched.length);
+        if (serched.length == 0){ //forward error message
+          res.render("search",{errHidden: "",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
+        }
+        else if (serched.length == 1){ //forward to movie page for that id
+
+        }
+        else{ //more than a single result
+
+        }
+      })
     }
     else{
-      //do nothing
+      res.render("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
     }
   }
-  res.render("search",{hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
 })
 // Movie Page - IMDB Information, Reviews
 app.get("/movie",function(req,res){ //redirect?
