@@ -1,6 +1,13 @@
+<div class="navBar">
 <a href="/"> Home </a>
 <a href="/about"> About </a>
 <a href="/profile" <%= hiddenOUT %>>Profile</a>
 <a href="/register"<%= hiddenIN %>> Register </a>
 <a href="/login" <%= hiddenIN%>> Login </a>
 <a href="/logout"<%= hiddenOUT %>> Logout </a>
+<!-- EZSEARCH FIX THIS -->
+<form action="/search" method="GET">
+    <input type="input" name="title" placeholder="Enter Movie Title ..." required>
+  <button type="submit" class="btn btn-dark">Submit</button>
+</form>
+</div>

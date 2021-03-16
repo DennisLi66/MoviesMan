@@ -333,7 +333,7 @@ app.get("/search",function(req,res){//search and search results
           res.render("search",{errHidden: "",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
         }
         else if (serched.length == 1){ //forward to movie page for that id
-
+          console.log()
         }
         else{ //more than a single result
 
