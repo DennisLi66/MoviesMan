@@ -333,12 +333,14 @@ app.get("/search",function(req,res){//search and search results
           res.render("search",{errHidden: "",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
         }
         else if (serched.length == 1){ //forward to movie page for that id
-          console.log()
+          var only1 = serched[0];
+          console.log(only1);
+          res.redirect("movie/" + only1.imdbid);
         }
         else{ //more than a single result
 
         }
-      })
+      }).catch(console.log("Error!"))
     }
     else{
       res.render("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
@@ -356,9 +358,9 @@ app.get("/movie/:movieid",function(req,res){
   //metacritic link is ez: https://www.metacritic.com/movie/the-toxic-avenger
   //rotten tomatoes link is ez: https://www.rottentomatoes.com/m/toxic_avenger
   var jsonMovie;
-  imdb.get({id: 'tt0090190'}, {apiKey: process.env.OMDBAPI})
+  imdb.get({id: req.params.movieid}, {apiKey: process.env.OMDBAPI})
     .then(function(x){
-      // console.log(x);
+      console.log(x);
       jsonMovie = x;
       var movieTitle = jsonMovie.title;
       var releaseYear = jsonMovie.year;
@@ -367,7 +369,7 @@ app.get("/movie/:movieid",function(req,res){
       var movieRating = jsonMovie.rated;
       var plot = jsonMovie.plot;
       res.render("movie",{movieTitle:movieTitle, moviePlot: plot, movieRating: movieRating,moviePoster:poster,hiddenOUT:'hidden',hiddenIN:''})
-    })
+    }).catch(console.log('Error!'))
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
