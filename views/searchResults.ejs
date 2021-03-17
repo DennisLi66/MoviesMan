@@ -1,0 +1,11 @@
+<%- include('partials/header') %>
+<!-- Should probably show recent / recent popular movies -->
+<%- include('partials/navbar') %>
+<h1> Search Page </h1>
+<div class="errorMessage" <%= errHidden %>> There were no results. </div>
+<form action="/search" method="GET">
+    <label for="title">Name of Movie:</label>
+    <input type="input" name="title" required>
+  <button type="submit" class="btn btn-dark">Submit</button>
+</form>
+<%- include('partials/footer') %>

@@ -9,7 +9,6 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
 const randomatic = require('randomatic');
 const imdb = require('imdb-api');
-
 //FIX THIS - ADD MOST LIKED MOVIES, MOST HIGHLY RATED AMONG USERS
 
 const app = express();
@@ -340,7 +339,7 @@ app.get("/search",function(req,res){//search and search results
         else{ //more than a single result
 
         }
-      }).catch(console.log("Error!"))
+      },console.log("Error!")).catch(console.log("Error!"))
     }
     else{
       res.render("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
@@ -359,17 +358,8 @@ app.get("/movie/:movieid",function(req,res){
   //rotten tomatoes link is ez: https://www.rottentomatoes.com/m/toxic_avenger
   var jsonMovie;
   imdb.get({id: req.params.movieid}, {apiKey: process.env.OMDBAPI})
-    .then(function(x){
-      console.log(x);
-      jsonMovie = x;
-      var movieTitle = jsonMovie.title;
-      var releaseYear = jsonMovie.year;
-      var movieId = req.params.movieid;
-      var poster = jsonMovie.poster;
-      var movieRating = jsonMovie.rated;
-      var plot = jsonMovie.plot;
-      res.render("movie",{movieTitle:movieTitle, moviePlot: plot, movieRating: movieRating,moviePoster:poster,hiddenOUT:'hidden',hiddenIN:''})
-    }).catch(console.log('Error!'))
+    .catch(console.log("Error 2"))
+    .then(console.log("Works"),console.log('Error!'))
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
@@ -469,7 +459,24 @@ app.route("/changePassword")
       res.redirect("/");
     }})
 app.get("/test",function(req,res){
-  imdb.get({id: 'tt0090190'}, {apiKey: process.env.OMDBAPI}).then(console.log);
+  var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&t=The+Avengers";
+  console.log(url);
+
+  https.get(url, function(res){
+      var body = '';
+
+      res.on('data', function(chunk){
+          body += chunk;
+      });
+
+      res.on('end', function(){
+          var fbResponse = JSON.parse(body);
+          console.log("Got a response: ", fbResponse);
+      });
+  }).on('error', function(e){
+        console.log("Got an error: ", e);
+  });
+
 })
 app.listen(3000,function(){
   console.log("Server Started.")
