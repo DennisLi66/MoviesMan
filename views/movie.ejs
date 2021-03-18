@@ -5,13 +5,28 @@
 <h1> <%= movieTitle%> </h1>
 <img src=<%= moviePoster%> alt="Movie Poster For <%= movieTitle%>">
 <br>
+Release Year: <%= movieYear %>
+<br>
 Rating: <%= movieRating %>
 <br>
 Description: <%= moviePlot %>
 <br>
-IMDB Rating:
+
+<div <%= imdbHidden %>>
+<a href=<%= imdbLink %>>IMDB</a> Rating: <%= imdbRating %>
 <br>
-Metacritic Rating:
+</div>
+
+<div <%= metaHidden %>>
+<a href=<%= metaLink %>>MetaCritic</a> Rating: <%= metaRating %>
 <br>
-Rotten Tomatoes Rating:
+</div>
+
+<div <%= rotHidden %>>
+<a href=<%= rotLink %>>Rotten Tomatoes</a> Rating: <%= rotRating %>
+</div>
+
+
+
+
 <%- include('partials/footer') %>

@@ -329,19 +329,22 @@ app.get("/search",function(req,res){//search and search results
         var serched = x.results;
         console.log(serched.length);
         if (serched.length == 0){ //forward error message
+                console.log("Found Nothing...")
           res.render("search",{errHidden: "",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
         }
         else if (serched.length == 1){ //forward to movie page for that id
+          console.log("Found 1...")
           var only1 = serched[0];
           console.log(only1);
           res.redirect("movie/" + only1.imdbid);
         }
         else{ //more than a single result
-
+      console.log("Found Multiple...")
         }
-      },console.log("Error!")).catch(console.log("Error!"))
+      })
     }
     else{
+      console.log("Found Nothing...")
       res.render("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
     }
   }
@@ -350,16 +353,85 @@ app.get("/search",function(req,res){//search and search results
 app.get("/movie",function(req,res){ //redirect?
   res.redirect("/search");
 })
-app.get("/movie/:movieid",function(req,res){
-  //perform OMDB Query for movie title
-  //if there are multiple of a movie forward to movies endpoint
+app.route("/movie/:movieid")
+.get(function(req,res){
+  var hiddenOUT = "";
+  var hiddenIN = "";
+  if (req.cookies.userData){
+    if (req.cookies.userDate.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      hiddenOUT = "hidden";
+    }
+    else{
+      hiddenIN = "hidden";
+    }
+  }
+  else{
+    hiddenOUT = "hidden";
+  }
   //allow users to rate movies
   //metacritic link is ez: https://www.metacritic.com/movie/the-toxic-avenger
   //rotten tomatoes link is ez: https://www.rottentomatoes.com/m/toxic_avenger
-  var jsonMovie;
-  imdb.get({id: req.params.movieid}, {apiKey: process.env.OMDBAPI})
-    .catch(console.log("Error 2"))
-    .then(console.log("Works"),console.log('Error!'))
+  var mId = req.params.movieid;
+  var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
+  https.get(url, function(reso){
+      var body = '';
+      reso.on('data', function(chunk){
+          body += chunk;
+      });
+      reso.on('end', function(){
+          var jsonRes = JSON.parse(body);
+          //console.log("Got a response: ", jsonRes);
+          var mTit = jsonRes.Title;
+          var mRated = jsonRes.Rated;
+          var mPlot = jsonRes.Plot;
+          var poster = jsonRes.Poster;
+          var mYear = jsonRes.Year;
+          var mDir = jsonRes.Director;
+          var mGenre = jsonRes.Genre;
+          var mMeta, mRotten, mIMDB;
+          var metaHide, imdbHide, rottenHide;
+          metaHide = imdbHide = rottenHide = "hidden";
+          var metaLink = "https://www.metacritic.com/movie/" + mTit.replace(/\s/g, '-').toLowerCase();
+          var rotLink = "https://www.rottentomatoes.com/m/" + mTit.replace(/\s/g, '_').toLowerCase();
+          var imdbLink = "https://www.imdb.com/title/" + mId;
+          for (var x = 0; x < jsonRes.Ratings.length; x++){
+            var src = jsonRes.Ratings[x].Source;
+            if (src === "Internet Movie Database"){
+              mIMDB = jsonRes.Ratings[x].Value;
+              imdbHide = "";
+            }
+            else if (src === "Rotten Tomatoes"){
+              mRotten = jsonRes.Ratings[x].Value;
+              rottenHide = "";
+            }
+            else if (src === "Metacritic"){
+              mMeta = jsonRes.Ratings[x].Value;
+              metaHide = "";
+            }
+          }
+          res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear,
+            movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
+          metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
+        imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
+      rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten})
+      });
+  }).on('error', function(e){
+        console.log("Got an error: ", e);
+                //FIX THIS: REDIRECT TO ERROR PAGE?
+        res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
+      })
+
+
+
+
+
+
+})
+.put(function(req,res){//assign rating
+})
+.post(function(req,res){//add to liked list
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
@@ -460,8 +532,7 @@ app.route("/changePassword")
     }})
 app.get("/test",function(req,res){
   var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&t=The+Avengers";
-  console.log(url);
-
+  // console.log(url);
   https.get(url, function(res){
       var body = '';
 
