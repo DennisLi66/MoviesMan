@@ -15,19 +15,20 @@ create table forgottenPasswords(
     inserted DATE
 );
 
-
--- //drop table forgottenPasswords; 
 -- likelist
--- create table likeList(
--- userID int NOT NULL
---  ,movieID  --figure out what data type a movieID is
--- );
+create table likeList(
+userID int NOT NULL,
+imdbID varchar(255) NOT NULL,
+movieName varchar(255) NOT NULL
+);
 -- ratings
--- create table ratingsList(
--- userID int NOT NULL,
--- movieID,
--- rating float NOT NULL
--- )
+
+create table ratingsList(
+userID int NOT NULL,
+movieID varchar(255) NOT NULL,
+movieName varchar(255) NOT NULL,
+rating int NOT NULL
+)
 
 -- select * from users
 -- select * from forgottenPasswords
