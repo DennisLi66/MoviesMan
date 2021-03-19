@@ -301,7 +301,7 @@ app.get("/logout",function(req,res){
 })
 // Search Information
 app.get("/search",function(req,res){//search and search results
-  console.log(req.query);
+  //console.log(req.query);
   var hiddenOUT = "";
   var hiddenIN = "";
   if (req.cookies.userData){
@@ -325,30 +325,35 @@ app.get("/search",function(req,res){//search and search results
       //convert title to its corresponding id
       console.log(req.query.title);
       var ttle = req.query.title;
-      imdb.search({name: ttle},{apiKey:process.env.OMDBAPI}).then(function(x){
+      var worked = true;
+      imdb.search({name: ttle},{apiKey:process.env.OMDBAPI})
+        .catch( (error) => worked = false)
+        .then(function(x){
+        if (worked){
+        console.log(x);
         var serched = x.results;
         console.log(serched.length);
-        if (serched.length == 0){ //forward error message
-                console.log("Found Nothing...")
-          res.render("search",{errHidden: "",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
-        }
-        else if (serched.length == 1){ //forward to movie page for that id
+        if (serched.length == 1){ //forward to movie page for that id
           console.log("Found 1...")
           var only1 = serched[0];
           console.log(only1);
           res.redirect("movie/" + only1.imdbid);
         }
         else{ //more than a single result
-      console.log("Found Multiple...")
+          console.log("Found Multiple...")
+          console.log(serched);
+          res.render("searchResults",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
         }
-      })
-    }
+        }
+        else{
+          console.log("Found Nothing...")
+          res.render("search",{errHidden: "",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
+        }})}
     else{
       console.log("Found Nothing...")
       res.render("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN});
     }
-  }
-})
+  }})
 // Movie Page - IMDB Information, Reviews
 app.get("/movie",function(req,res){ //redirect?
   res.redirect("/search");
