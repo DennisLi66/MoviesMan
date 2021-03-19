@@ -330,20 +330,17 @@ app.get("/search",function(req,res){//search and search results
         .catch( (error) => worked = false)
         .then(function(x){
         if (worked){
-        console.log(x);
-        var serched = x.results;
-        console.log(serched.length);
-        if (serched.length == 1){ //forward to movie page for that id
-          console.log("Found 1...")
-          var only1 = serched[0];
-          console.log(only1);
-          res.redirect("movie/" + only1.imdbid);
-        }
-        else{ //more than a single result
-          console.log("Found Multiple...")
-          console.log(serched);
-          res.render("searchResults",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
-        }
+          var serched = x.results;
+          if (serched.length == 1){ //forward to movie page for that id
+            console.log("Found a Single Value...")
+            var only1 = serched[0];
+            res.redirect("movie/" + only1.imdbid);
+          }
+          else{ //more than a single result
+            console.log("Found Multiple...")
+            console.log(serched);
+            res.render("searchResults",{sResults:serched,errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
+          }
         }
         else{
           console.log("Found Nothing...")

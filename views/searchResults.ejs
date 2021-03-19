@@ -8,4 +8,19 @@
     <input type="input" name="title" required>
   <button type="submit" class="btn btn-dark">Submit</button>
 </form>
+
+<ul>
+<% for(var i = 0; i < sResults.length; i++) { %>
+  <li> <%= sResults[i].title %> </li>
+  <li> <%= sResults[i].year %> </li>
+  <li> <%= sResults[i].poster %> </li>
+
+  <div class="resultBox">
+    <a href= <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %> > <%= sResults[i].title %> </a>
+    <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %>
+  </div>
+
+<% } %>
+</ul>
+
 <%- include('partials/footer') %>
