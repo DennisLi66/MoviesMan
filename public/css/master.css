@@ -17,13 +17,21 @@ body{
 .resultBox{
   background-color: white;
   color: black;
-  border: 1px solid black;
+  /* border: 1px solid black; */
+  height: 250px;
+  margin-bottom: 10px;
+  float:left
 }
-.resultBoxLeft{
+.resultBoxHalf{
   background-color: white;
   color: black;
+  float: left;
+  width: 50%;
+  height: 100%
 }
-.resultBoxRight{
-  background-color: white;
-  color: black;
+.rbImg{
+  height:200px;
+  width:auto;
+  padding-top: 25px;
+  padding-left: 25px
 }

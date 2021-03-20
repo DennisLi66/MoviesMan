@@ -11,16 +11,18 @@
 
 <ul>
 <% for(var i = 0; i < sResults.length; i++) { %>
-  <li> <%= sResults[i].title %> </li>
-  <li> <%= sResults[i].year %> </li>
-  <li> <%= sResults[i].poster %> </li>
-
+<% if (sResults[i].type === "movie"){ %>
   <div class="resultBox">
-    <a href= <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %> > <%= sResults[i].title %> </a>
-    <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %>
+    <div class="resultBoxHalf">
+      <img class="rbImg" src=<%= sResults[i].poster %> onerror="this.src='/images/altImage.png'">
+    </div>
+    <div class="resultBoxHalf">
+          <a href= <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %> > <%= sResults[i].title %> </a>
+          <li> <%= sResults[i].year %> </li>
+      </div>
   </div>
 
-<% } %>
+<% }} %>
 </ul>
 
 <%- include('partials/footer') %>
