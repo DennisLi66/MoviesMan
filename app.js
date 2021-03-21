@@ -301,7 +301,6 @@ app.get("/logout",function(req,res){
 })
 // Search Information
 app.get("/search",function(req,res){//search and search results
-  //console.log(req.query);
   var hiddenOUT = "";
   var hiddenIN = "";
   if (req.cookies.userData){
@@ -322,7 +321,6 @@ app.get("/search",function(req,res){//search and search results
   }
   else{
     if (req.query.title){
-      //convert title to its corresponding id
       console.log(req.query.title);
       var ttle = req.query.title;
       var worked = true;
@@ -413,7 +411,7 @@ app.route("/movie/:movieid")
               metaHide = "";
             }
           }
-          res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear,
+          res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear, mId:mId,
             movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
           metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
         imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
@@ -431,9 +429,59 @@ app.route("/movie/:movieid")
 
 
 })
-.put(function(req,res){//assign rating
-})
-.post(function(req,res){//add to liked list
+.post(function(req,res){//add to liked list or assign rating
+  var hiddenOUT = "";
+  var hiddenIN = "";
+  if (req.cookies.userData){
+    if (req.cookies.userDate.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      hiddenOUT = "hidden";
+      res.redirect("login");
+    }
+    else{
+      hiddenIN = "hidden";
+    }
+
+    console.log("POST REQUEST TRIGGERED!")
+    console.log(req.params.movieid);
+    if (req.body.selfRating && req.body.liked){
+      console.log("Shouldn't perform these at the same time!");
+      //have a hidden input to transfer all the ejs elements back into here
+    }
+    else if (req.body.liked){
+      console.log("Adding to Liked List...")
+      if (hiddenIN === "hidden"){
+        //add to mysql
+      }
+      else{
+        // throw error
+        res.redirect("/login");
+      }
+    }
+    else if (req.body.selfRating){
+      console.log("Adding to Rating List...")
+      if (hiddenIN === "hidden"){
+        //add to mysql
+      }
+      else{
+        // throw error
+        res.redirect("/login");
+      }
+    }
+    else{
+      console.log("Nothing Happened?")
+      // same as &&
+    }
+
+
+
+  }
+  else{
+    hiddenOUT = "hidden";
+    res.redirect("/login");
+  }
+
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
