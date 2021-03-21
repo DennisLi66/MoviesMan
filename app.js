@@ -153,7 +153,7 @@ app.route("/login")
                   email: results[0].email,
                   temporary: false
                 }
-                res.cookie("userData",cookieObj,{expires:new Date(5000 + Date.now())}); //FIX THIS INTO LONGER TIME BASED COOKIE
+                res.cookie("userData",cookieObj,{expires:new Date(500000 + Date.now())}); //FIX THIS INTO LONGER TIME BASED COOKIE
                 res.redirect("/");
               }
               else{
@@ -432,6 +432,7 @@ app.route("/movie/:movieid")
 .post(function(req,res){//add to liked list or assign rating
   var hiddenOUT = "";
   var hiddenIN = "";
+  console.log("POST REQUEST TRIGGERED!")
   if (req.cookies.userData){
     if (req.cookies.userDate.temporary){
       res.clearCookie('userData');
@@ -442,46 +443,28 @@ app.route("/movie/:movieid")
     else{
       hiddenIN = "hidden";
     }
-
-    console.log("POST REQUEST TRIGGERED!")
     console.log(req.params.movieid);
     if (req.body.selfRating && req.body.liked){
       console.log("Shouldn't perform these at the same time!");
       //have a hidden input to transfer all the ejs elements back into here
+      res.redirect("/movie/" + req.params.movieid);
     }
     else if (req.body.liked){
       console.log("Adding to Liked List...")
-      if (hiddenIN === "hidden"){
-        //add to mysql
-      }
-      else{
-        // throw error
-        res.redirect("/login");
-      }
+
     }
     else if (req.body.selfRating){
       console.log("Adding to Rating List...")
-      if (hiddenIN === "hidden"){
-        //add to mysql
-      }
-      else{
-        // throw error
-        res.redirect("/login");
-      }
+
     }
     else{
       console.log("Nothing Happened?")
-      // same as &&
+      res.redirect("/movie/" + req.params.movieid);
     }
-
-
-
   }
   else{
-    hiddenOUT = "hidden";
     res.redirect("/login");
   }
-
 })
 // Profile Information - Liked Movies, Movie Reviews
 app.get("/profile",function(req,res){ //go to user's specfic profile, or redirect if not logged in
