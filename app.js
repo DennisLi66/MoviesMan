@@ -304,7 +304,7 @@ app.get("/search",function(req,res){//search and search results
   var hiddenOUT = "";
   var hiddenIN = "";
   if (req.cookies.userData){
-    if (req.cookies.userDate.temporary){
+    if (req.cookies.userData.temporary){
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
       hiddenOUT = "hidden";
@@ -358,7 +358,7 @@ app.route("/movie/:movieid")
   var hiddenOUT = "";
   var hiddenIN = "";
   if (req.cookies.userData){
-    if (req.cookies.userDate.temporary){
+    if (req.cookies.userData.temporary){
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
       hiddenOUT = "hidden";
@@ -434,7 +434,7 @@ app.route("/movie/:movieid")
   var hiddenIN = "";
   console.log("POST REQUEST TRIGGERED!")
   if (req.cookies.userData){
-    if (req.cookies.userDate.temporary){
+    if (req.cookies.userData.temporary){
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
       hiddenOUT = "hidden";
@@ -450,7 +450,28 @@ app.route("/movie/:movieid")
       res.redirect("/movie/" + req.params.movieid);
     }
     else if (req.body.liked){
-      console.log("Adding to Liked List...")
+      console.log("Adding to Liked List...");
+      if (req.body.liked === "like"){
+        console.log(req.body.mname)
+        var query = "INSERT INTO likeList (email,imdbID,movieName) VALUES (?,?,?)";
+        connection.query(query,[req.cookies.userData.email,req.params.movieid,req.body.mname],function(eror, results, fields){
+          if (eror){
+            console.log(eror);
+          }
+            res.redirect("/movie/" + req.params.movieid); // FIX THIS: WILL NEED TO USE SQL TO SEE IF ALREADY LIKED
+        })
+      }
+      else{
+        var query = "DELETE FROM likeList WHERE email = ? AND imdbID = ?";
+        connection.query(query,[req.cookies.userData.email,req.params.movieid],function(eror,results,fields){
+          if (eror){
+            console.log(eror);
+          }
+          res.redirect("/movie/" + req.params.movieid);
+        })
+      }
+
+
 
     }
     else if (req.body.selfRating){

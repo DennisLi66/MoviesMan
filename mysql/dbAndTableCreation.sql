@@ -10,25 +10,28 @@ create table users(
 );
 
 create table forgottenPasswords(
-	email varchar(255),
-	recoveryLink varchar(255),
-    inserted DATE
+	email varchar(255) NOT NULL,
+	recoveryLink varchar(255) NOT NULL,
+    inserted DATE NOT NULL
 );
 
 -- likelist
 create table likeList(
-userID int NOT NULL,
+	email varchar(255) NOT NULL,
 imdbID varchar(255) NOT NULL,
 movieName varchar(255) NOT NULL
 );
 -- ratings
 
 create table ratingsList(
-userID int NOT NULL,
+	email varchar(255) NOT NULL,
 movieID varchar(255) NOT NULL,
 movieName varchar(255) NOT NULL,
 rating int NOT NULL
-)
+);
 
+-- drop table likeList;
+-- drop table ratingsList;
+-- select * from likeList
 -- select * from users
 -- select * from forgottenPasswords

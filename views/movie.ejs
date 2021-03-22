@@ -30,6 +30,7 @@ Description: <%= moviePlot %>
 <br>
 <form method="POST" action=<%= "/movie/" + mId %> >
   <input type="hidden" id="liked" name="liked" value="like">
+  <input type="hidden" id="mname" name="mname" value=" <%= movieTitle %> ">
 <input type="submit" value="Like">
 </form>
 <!-- Rating List - Redirect Here -->
