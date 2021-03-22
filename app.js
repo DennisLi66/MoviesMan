@@ -292,7 +292,7 @@ app.get("/logout",function(req,res){
     var username = req.cookies.userData.name;
     res.clearCookie('userData');
     console.log(username + " has been logged out.");
-    res.render("logout",{toRemovUser: username})
+    res.render("logout",{toRemovUser: username,hiddenOUT:"hidden",hiddenIN:""})
   }
   else{
     console.log("User isn't even logged in! Redirecting...");
@@ -357,6 +357,8 @@ app.route("/movie/:movieid")
 .get(function(req,res){
   var hiddenOUT = "";
   var hiddenIN = "";
+  var likeOption = "like";
+  var likeText = "Like"
   if (req.cookies.userData){
     if (req.cookies.userData.temporary){
       res.clearCookie('userData');
@@ -365,64 +367,137 @@ app.route("/movie/:movieid")
     }
     else{
       hiddenIN = "hidden";
+      var cQuery = "SELECT * FROM likeList WHERE email = ? AND imdbID = ?";
+      connection.query(cQuery,[req.cookies.userData.email,req.params.movieid],function(error,results,fields){
+        console.log(req.cookies.userData.email,req.params.movieid);
+        if (error){
+          console.log(error);
+          res.redirect("/movie/" + req.params.movieid);
+        }
+        else{
+          console.log(results);
+          if (results.length > 0){
+            likeOption = "unlike";
+            likeText = "Unlike";
+          }
+          var mId = req.params.movieid;
+          var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
+          https.get(url, function(reso){
+              var body = '';
+              reso.on('data', function(chunk){
+                  body += chunk;
+              });
+              reso.on('end', function(){
+                  var jsonRes = JSON.parse(body);
+                  //console.log("Got a response: ", jsonRes);
+                  var mTit = jsonRes.Title;
+                  var mRated = jsonRes.Rated;
+                  var mPlot = jsonRes.Plot;
+                  var poster = jsonRes.Poster;
+                  var mYear = jsonRes.Year;
+                  var mDir = jsonRes.Director;
+                  var mGenre = jsonRes.Genre;
+                  var mMeta, mRotten, mIMDB;
+                  var metaHide, imdbHide, rottenHide;
+                  metaHide = imdbHide = rottenHide = "hidden";
+                  var metaLink = "https://www.metacritic.com/movie/" + mTit.replace(/\s/g, '-').toLowerCase();
+                  var rotLink = "https://www.rottentomatoes.com/m/" + mTit.replace(/\s/g, '_').toLowerCase();
+                  var imdbLink = "https://www.imdb.com/title/" + mId;
+                  for (var x = 0; x < jsonRes.Ratings.length; x++){
+                    var src = jsonRes.Ratings[x].Source;
+                    if (src === "Internet Movie Database"){
+                      mIMDB = jsonRes.Ratings[x].Value;
+                      imdbHide = "";
+                    }
+                    else if (src === "Rotten Tomatoes"){
+                      mRotten = jsonRes.Ratings[x].Value;
+                      rottenHide = "";
+                    }
+                    else if (src === "Metacritic"){
+                      mMeta = jsonRes.Ratings[x].Value;
+                      metaHide = "";
+                    }
+                  }
+                  res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear, mId:mId,
+                    movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
+                  metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
+                imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
+              rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
+            likeOpt: likeOption, likeText: likeText})
+              });
+          }).on('error', function(e){
+                console.log("Got an error: ", e);
+                        //FIX THIS: REDIRECT TO ERROR PAGE?
+                res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
+              })
+
+
+
+
+
+
+        }
+      })
     }
   }
   else{
     hiddenOUT = "hidden";
+    var mId = req.params.movieid;
+    var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
+    https.get(url, function(reso){
+        var body = '';
+        reso.on('data', function(chunk){
+            body += chunk;
+        });
+        reso.on('end', function(){
+            var jsonRes = JSON.parse(body);
+            //console.log("Got a response: ", jsonRes);
+            var mTit = jsonRes.Title;
+            var mRated = jsonRes.Rated;
+            var mPlot = jsonRes.Plot;
+            var poster = jsonRes.Poster;
+            var mYear = jsonRes.Year;
+            var mDir = jsonRes.Director;
+            var mGenre = jsonRes.Genre;
+            var mMeta, mRotten, mIMDB;
+            var metaHide, imdbHide, rottenHide;
+            metaHide = imdbHide = rottenHide = "hidden";
+            var metaLink = "https://www.metacritic.com/movie/" + mTit.replace(/\s/g, '-').toLowerCase();
+            var rotLink = "https://www.rottentomatoes.com/m/" + mTit.replace(/\s/g, '_').toLowerCase();
+            var imdbLink = "https://www.imdb.com/title/" + mId;
+            for (var x = 0; x < jsonRes.Ratings.length; x++){
+              var src = jsonRes.Ratings[x].Source;
+              if (src === "Internet Movie Database"){
+                mIMDB = jsonRes.Ratings[x].Value;
+                imdbHide = "";
+              }
+              else if (src === "Rotten Tomatoes"){
+                mRotten = jsonRes.Ratings[x].Value;
+                rottenHide = "";
+              }
+              else if (src === "Metacritic"){
+                mMeta = jsonRes.Ratings[x].Value;
+                metaHide = "";
+              }
+            }
+            res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear, mId:mId,
+              movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
+            metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
+          imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
+        rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
+      likeOpt: likeOption, likeText: likeText})
+        });
+    }).on('error', function(e){
+          console.log("Got an error: ", e);
+                  //FIX THIS: REDIRECT TO ERROR PAGE?
+          res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
+        })
+
+
   }
   //allow users to rate movies
   //metacritic link is ez: https://www.metacritic.com/movie/the-toxic-avenger
   //rotten tomatoes link is ez: https://www.rottentomatoes.com/m/toxic_avenger
-  var mId = req.params.movieid;
-  var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
-  https.get(url, function(reso){
-      var body = '';
-      reso.on('data', function(chunk){
-          body += chunk;
-      });
-      reso.on('end', function(){
-          var jsonRes = JSON.parse(body);
-          //console.log("Got a response: ", jsonRes);
-          var mTit = jsonRes.Title;
-          var mRated = jsonRes.Rated;
-          var mPlot = jsonRes.Plot;
-          var poster = jsonRes.Poster;
-          var mYear = jsonRes.Year;
-          var mDir = jsonRes.Director;
-          var mGenre = jsonRes.Genre;
-          var mMeta, mRotten, mIMDB;
-          var metaHide, imdbHide, rottenHide;
-          metaHide = imdbHide = rottenHide = "hidden";
-          var metaLink = "https://www.metacritic.com/movie/" + mTit.replace(/\s/g, '-').toLowerCase();
-          var rotLink = "https://www.rottentomatoes.com/m/" + mTit.replace(/\s/g, '_').toLowerCase();
-          var imdbLink = "https://www.imdb.com/title/" + mId;
-          for (var x = 0; x < jsonRes.Ratings.length; x++){
-            var src = jsonRes.Ratings[x].Source;
-            if (src === "Internet Movie Database"){
-              mIMDB = jsonRes.Ratings[x].Value;
-              imdbHide = "";
-            }
-            else if (src === "Rotten Tomatoes"){
-              mRotten = jsonRes.Ratings[x].Value;
-              rottenHide = "";
-            }
-            else if (src === "Metacritic"){
-              mMeta = jsonRes.Ratings[x].Value;
-              metaHide = "";
-            }
-          }
-          res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear, mId:mId,
-            movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
-          metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
-        imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
-      rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten})
-      });
-  }).on('error', function(e){
-        console.log("Got an error: ", e);
-                //FIX THIS: REDIRECT TO ERROR PAGE?
-        res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
-      })
-
 
 
 
@@ -471,12 +546,21 @@ app.route("/movie/:movieid")
         })
       }
 
-
+//FIX THIS ADD UNIQUE AND PRIMARY KEYS
 
     }
     else if (req.body.selfRating){
       console.log("Adding to Rating List...")
-
+      var query =
+      `
+      INSERT INTO ratingsList
+        (subs_name, subs_email, subs_birthday)
+      VALUES
+        (?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        subs_name     = VALUES(subs_name),
+        subs_birthday = VALUES(subs_birthday)
+      `
     }
     else{
       console.log("Nothing Happened?")

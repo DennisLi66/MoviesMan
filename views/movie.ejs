@@ -29,13 +29,14 @@ Description: <%= moviePlot %>
 <!-- Like Button Redirect Here-->
 <br>
 <form method="POST" action=<%= "/movie/" + mId %> >
-  <input type="hidden" id="liked" name="liked" value="like">
+  <input type="hidden" id="liked" name="liked" value="<%= likeOpt %>">
   <input type="hidden" id="mname" name="mname" value=" <%= movieTitle %> ">
-<input type="submit" value="Like">
+<input type="submit" value="<%= likeText %>">
 </form>
 <!-- Rating List - Redirect Here -->
 <br>
 <form method='POST' action=<%= "/movie/" + mId %> >
+<input type="hidden" id="mname" name="mname" value=" <%= movieTitle %> ">
 <label for="selfRating">Choose a Rating:</label><br>
 <select id="selfRating" name="selfRating">
   <option value="1">1</option>
