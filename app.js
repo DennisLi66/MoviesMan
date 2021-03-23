@@ -354,7 +354,7 @@ app.get("/movie",function(req,res){ //redirect?
   res.redirect("/search");
 })
 app.route("/movie/:movieid")
-.get(function(req,res){
+.get(function(req,res){ //FIX THIS: ADD number of likes and user rating
   var hiddenOUT = "";
   var hiddenIN = "";
   var likeOption = "like";
@@ -367,7 +367,7 @@ app.route("/movie/:movieid")
     }
     else{
       hiddenIN = "hidden";
-      var cQuery = "SELECT * FROM likeList WHERE email = ? AND imdbID = ?";
+      var cQuery = "SELECT * FROM likeList WHERE email = ? AND imdbID = ?"; //FIX THIS:  CHANGE QUERY TO OBTAIN MORE INFORMATION
       connection.query(cQuery,[req.cookies.userData.email,req.params.movieid],function(error,results,fields){
         console.log(req.cookies.userData.email,req.params.movieid);
         if (error){
@@ -554,13 +554,26 @@ app.route("/movie/:movieid")
       var query =
       `
       INSERT INTO ratingsList
-        (subs_name, subs_email, subs_birthday)
+        (email, imdbID, movieName, rating)
       VALUES
-        (?, ?, ?)
+        (?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
-        subs_name     = VALUES(subs_name),
-        subs_birthday = VALUES(subs_birthday)
+        rating     = VALUES(rating)
       `
+      var selfRating = f = parseInt(req.body.selfRating);
+      if (selfRating < 1 || selfRating > 10){
+        console.log("Invalid Number is being used!");
+        res.redirect("/movie/" + req.params.movieid);
+      }
+      else{
+        connection.query(query,
+          [req.cookies.userData.email,req.params.movieid,req.body.mname,selfRating],function(error,results,fields){
+            if (error){
+              console.log(error);
+            }
+            res.redirect("/movie/" + req.params.movieid);
+        })
+      }
     }
     else{
       console.log("Nothing Happened?")

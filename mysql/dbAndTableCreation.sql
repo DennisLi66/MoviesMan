@@ -36,5 +36,6 @@ CONSTRAINT RL PRIMARY KEY (email,imdbID)
 -- drop table likeList;
 -- drop table ratingsList;
 -- select * from likeList
+-- select * from ratingsList
 -- select * from users
 -- select * from forgottenPasswords
