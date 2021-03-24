@@ -12,6 +12,9 @@ ON a.imdbID = c.imdbID
 WHERE a.imdbID IS NULL
 ) b;
 
+-- select imdbID, movieName, count(*) from likeList group by imdbID
+
+
 -- Below Query Obtains all the likes and rates for a specified email
 SELECT "1@2.com" as email, ifnull(imdbID,Liked) as ID, ifnull(movieName,title) as Title, ifnull(rating,0) as Rating, if(Liked is NULL,"Unliked","Liked") as Liked FROM 
 (SELECT * FROM
