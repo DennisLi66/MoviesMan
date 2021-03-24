@@ -367,6 +367,8 @@ app.route("/movie/:movieid")
     }
     else{
       hiddenIN = "hidden";
+//START OF MYSQL ADD MORE VARIABLES
+
       var cQuery = "SELECT * FROM likeList WHERE email = ? AND imdbID = ?"; //FIX THIS:  CHANGE QUERY TO OBTAIN MORE INFORMATION
       connection.query(cQuery,[req.cookies.userData.email,req.params.movieid],function(error,results,fields){
         console.log(req.cookies.userData.email,req.params.movieid);
@@ -380,6 +382,12 @@ app.route("/movie/:movieid")
             likeOption = "unlike";
             likeText = "Unlike";
           }
+
+
+///// FIX THIS END OF MYSQL
+
+
+
           var mId = req.params.movieid;
           var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
           https.get(url, function(reso){
