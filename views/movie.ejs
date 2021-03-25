@@ -29,6 +29,7 @@ Description: <%= moviePlot %>
 <!-- Like Button Redirect Here-->
 <br>
 <form method="POST" action=<%= "/movie/" + mId %> >
+  <div> Number of People who have Liked this movie: <%= likeCount %>. </div>
   <input type="hidden" id="liked" name="liked" value="<%= likeOpt %>">
   <input type="hidden" id="mname" name="mname" value=" <%= movieTitle %> ">
 <input type="submit" value="<%= likeText %>">
@@ -37,6 +38,9 @@ Description: <%= moviePlot %>
 <br>
 <form method='POST' action=<%= "/movie/" + mId %> >
 <input type="hidden" id="mname" name="mname" value=" <%= movieTitle %> ">
+<div> Number of People who have rated this movie: <%= rateCount %>.</div>
+<div> The average rating of this movie is <%= avgRATING %>.</div>
+<div <%= hiddenRating %>> You've previously rated this <%= previouslyRated %>.</div>
 <label for="selfRating">Choose a Rating:</label><br>
 <select id="selfRating" name="selfRating">
   <option value="1">1</option>

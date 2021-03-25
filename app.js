@@ -359,6 +359,12 @@ app.route("/movie/:movieid")
   var hiddenIN = "";
   var likeOption = "like";
   var likeText = "Like"
+  var mId = req.params.movieid;
+  var numberOfRaters = 0;
+  var averageRating = "Unrated";
+  var numberOfLikes = 0;
+  var previouslyRated = 0;
+  var hiddenRating = "hidden";
   if (req.cookies.userData){
     if (req.cookies.userData.temporary){
       res.clearCookie('userData');
@@ -450,7 +456,37 @@ app.route("/movie/:movieid")
   }
   else{
     hiddenOUT = "hidden";
-    var mId = req.params.movieid;
+    var offQuery = `
+    SELECT * from (
+    SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber ,ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM
+    (select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a
+    LEFT JOIN
+    (select imdbID,count(*) as RatingNumber,avg(rating) as Average from ratingsList GROUP BY imdbID) c ON a.imdbID = c.imdbID
+    UNION ALL
+    SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber, ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM
+    (select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a RIGHT JOIN
+    (select imdbID,count(*) as RatingNumber, avg(rating) as Average from ratingsList GROUP BY imdbID) c
+    ON a.imdbID = c.imdbID
+    WHERE a.imdbID IS NULL
+  ) b WHERE imdbID = ?;
+    `
+    connection.query(offQuery,[mId],function(error,results,fields){
+      if (error){
+        console.log(error);
+        res.redirect("/movie/" + mId);
+      }
+      else if (results){
+        if (results.length == 0){
+          console.log("Not Yet Liked or Rated, Using Defaults...")
+        }
+        else{
+          console.log(results[0]);
+          averageRating = results[0].Average;
+          numberOfRaters = results[0].RatingNumber;
+          numberOfLikes = results[0].Likes;
+        }
+      }
+    })
     var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
     https.get(url, function(reso){
         var body = '';
@@ -493,7 +529,9 @@ app.route("/movie/:movieid")
             metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
           imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
         rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
-      likeOpt: likeOption, likeText: likeText})
+      likeOpt: likeOption, likeText: likeText,
+      rateCount:numberOfRaters, likeCount:numberOfLikes, avgRATING: averageRating, hiddenRating: hiddenRating, previouslyRated:previouslyRated
+    })
         });
     }).on('error', function(e){
           console.log("Got an error: ", e);
