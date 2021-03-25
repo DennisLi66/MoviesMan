@@ -35,9 +35,9 @@ LEFT JOIN
 
 SELECT * FROM ( SELECT ifnull(email,emul) as email, ifnull(imdbID,Liked) as ID, ifnull(movieName,title) as Title, ifnull(rating,0) as Rating, if(Liked is NULL,"Unliked","Liked") as Liked FROM 
 (SELECT * FROM (select * from ratingsList WHERE ratingsList.imdbID = "tt0120915" -- BLANK: Change to movies's id
-)  y LEFT JOIN (select email as emul, imdbID as Liked, movieName as title from likeList WHERE likeList.imdbID = "tt0092965"
+)  y LEFT JOIN (select email as emul, imdbID as Liked, movieName as title from likeList WHERE likeList.imdbID = "tt0120915"
 ) z ON z.Liked = y.imdbID UNION SELECT * FROM (select * from ratingsList WHERE ratingsList.imdbID = "tt0120915" -- BLANK: Change to movies's id
-)  y LEFT JOIN (select email as emul,imdbID as Liked, movieName as title from likeList WHERE likeList.imdbID = "tt0092965"
+)  y LEFT JOIN (select email as emul,imdbID as Liked, movieName as title from likeList WHERE likeList.imdbID = "tt0120915"
 ) z ON z.Liked = y.imdbID WHERE email is null) a WHERE email = "a@2.com" -- BLANK: Change to user's email 
 ) userRating RIGHT JOIN ( SELECT * from ( SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber ,ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM 
 (select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a

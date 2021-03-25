@@ -365,6 +365,7 @@ app.route("/movie/:movieid")
   var numberOfLikes = 0;
   var previouslyRated = 0;
   var hiddenRating = "hidden";
+  var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
   if (req.cookies.userData){
     if (req.cookies.userData.temporary){
       res.clearCookie('userData');
@@ -375,27 +376,38 @@ app.route("/movie/:movieid")
       hiddenIN = "hidden";
 //START OF MYSQL ADD MORE VARIABLES
 
-      var cQuery = "SELECT * FROM likeList WHERE email = ? AND imdbID = ?"; //FIX THIS:  CHANGE QUERY TO OBTAIN MORE INFORMATION
-      connection.query(cQuery,[req.cookies.userData.email,req.params.movieid],function(error,results,fields){
-        console.log(req.cookies.userData.email,req.params.movieid);
+      var cQuery =
+      `
+      SELECT * FROM ( SELECT ifnull(email,emul) as email, ifnull(imdbID,Liked) as ID, ifnull(movieName,title) as Title, ifnull(rating,0) as Rating, if(Liked is NULL,"Unliked","Liked") as Liked FROM
+      (SELECT * FROM (select * from ratingsList WHERE ratingsList.imdbID = ?
+      )  y LEFT JOIN (select email as emul, imdbID as Liked, movieName as title from likeList WHERE likeList.imdbID = ?
+      ) z ON z.Liked = y.imdbID UNION SELECT * FROM (select * from ratingsList WHERE ratingsList.imdbID = ?
+      )  y LEFT JOIN (select email as emul,imdbID as Liked, movieName as title from likeList WHERE likeList.imdbID = ?
+      ) z ON z.Liked = y.imdbID WHERE email is null) a WHERE email = ?
+      ) userRating RIGHT JOIN ( SELECT * from ( SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber ,ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM
+      (select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a
+      LEFT JOIN  (select imdbID,count(*) as RatingNumber,avg(rating) as Average from ratingsList GROUP BY imdbID) c ON a.imdbID = c.imdbID
+      UNION ALL SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber, ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM
+      (select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a RIGHT JOIN
+      (select imdbID,count(*) as RatingNumber, avg(rating) as Average from ratingsList GROUP BY imdbID) c
+      ON a.imdbID = c.imdbID WHERE a.imdbID IS NULL) b WHERE imdbID = ?
+      ) allRatings ON allRatings.imdbID = userRating.ID
+      `
+      ;
+      connection.query(cQuery,[mId,mId,mId,mId,req.cookies.userData.email,mId],function(error,results,fields){
         if (error){
           console.log(error);
           res.redirect("/movie/" + req.params.movieid);
         }
         else{
           console.log(results);
-          if (results.length > 0){
-            likeOption = "unlike";
-            likeText = "Unlike";
+          if (results.length == 0){ //no ratings or likes yet
+            console.log("Not Yet Liked or Rated, Using Defaults...")
           }
+          else if (results.length >= 1){
 
-
-///// FIX THIS END OF MYSQL
-
-
-
-          var mId = req.params.movieid;
-          var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
+          }
+///// FIX THIS END OF MYSQL: but need to edit below function too
           https.get(url, function(reso){
               var body = '';
               reso.on('data', function(chunk){
@@ -437,23 +449,15 @@ app.route("/movie/:movieid")
                   metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
                 imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
               rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
-            likeOpt: likeOption, likeText: likeText})
+            likeOpt: likeOption, likeText: likeText,
+            rateCount:numberOfRaters, likeCount:numberOfLikes, avgRATING: averageRating, hiddenRating: hiddenRating, previouslyRated:previouslyRated
+})
               });
           }).on('error', function(e){
                 console.log("Got an error: ", e);
                         //FIX THIS: REDIRECT TO ERROR PAGE?
                 res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
-              })
-
-
-
-
-
-
-        }
-      })
-    }
-  }
+              })}})}}
   else{
     hiddenOUT = "hidden";
     var offQuery = `
@@ -487,7 +491,6 @@ app.route("/movie/:movieid")
         }
       }
     })
-    var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
     https.get(url, function(reso){
         var body = '';
         reso.on('data', function(chunk){
@@ -538,17 +541,7 @@ app.route("/movie/:movieid")
                   //FIX THIS: REDIRECT TO ERROR PAGE?
           res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
         })
-
-
   }
-  //allow users to rate movies
-  //metacritic link is ez: https://www.metacritic.com/movie/the-toxic-avenger
-  //rotten tomatoes link is ez: https://www.rottentomatoes.com/m/toxic_avenger
-
-
-
-
-
 })
 .post(function(req,res){//add to liked list or assign rating
   var hiddenOUT = "";
