@@ -405,59 +405,67 @@ app.route("/movie/:movieid")
             console.log("Not Yet Liked or Rated, Using Defaults...")
           }
           else if (results.length >= 1){
-
-          }
-///// FIX THIS END OF MYSQL: but need to edit below function too
-          https.get(url, function(reso){
-              var body = '';
-              reso.on('data', function(chunk){
-                  body += chunk;
-              });
-              reso.on('end', function(){
-                  var jsonRes = JSON.parse(body);
-                  //console.log("Got a response: ", jsonRes);
-                  var mTit = jsonRes.Title;
-                  var mRated = jsonRes.Rated;
-                  var mPlot = jsonRes.Plot;
-                  var poster = jsonRes.Poster;
-                  var mYear = jsonRes.Year;
-                  var mDir = jsonRes.Director;
-                  var mGenre = jsonRes.Genre;
-                  var mMeta, mRotten, mIMDB;
-                  var metaHide, imdbHide, rottenHide;
-                  metaHide = imdbHide = rottenHide = "hidden";
-                  var metaLink = "https://www.metacritic.com/movie/" + mTit.replace(/\s/g, '-').toLowerCase();
-                  var rotLink = "https://www.rottentomatoes.com/m/" + mTit.replace(/\s/g, '_').toLowerCase();
-                  var imdbLink = "https://www.imdb.com/title/" + mId;
-                  for (var x = 0; x < jsonRes.Ratings.length; x++){
-                    var src = jsonRes.Ratings[x].Source;
-                    if (src === "Internet Movie Database"){
-                      mIMDB = jsonRes.Ratings[x].Value;
-                      imdbHide = "";
+            console.log(results[0]);
+            averageRating = results[0].Average;
+            numberOfRaters = results[0].RatingNumber;
+            numberOfLikes = results[0].Likes;
+            if (results[0].Rating){
+              var previouslyRated = results[0].Rating;
+              var hiddenRating = "";
+            }
+            if (results[0].Liked){
+              if (results[0].Liked === "Liked"){
+                likeOption = "unlike";
+                likeText = "Unlike";
+              }
+            }
+            https.get(url, function(reso){
+                var body = '';
+                reso.on('data', function(chunk){
+                    body += chunk;
+                });
+                reso.on('end', function(){
+                    var jsonRes = JSON.parse(body);
+                    //console.log("Got a response: ", jsonRes);
+                    var mTit = jsonRes.Title;
+                    var mRated = jsonRes.Rated;
+                    var mPlot = jsonRes.Plot;
+                    var poster = jsonRes.Poster;
+                    var mYear = jsonRes.Year;
+                    var mDir = jsonRes.Director;
+                    var mGenre = jsonRes.Genre;
+                    var mMeta, mRotten, mIMDB;
+                    var metaHide, imdbHide, rottenHide;
+                    metaHide = imdbHide = rottenHide = "hidden";
+                    var metaLink = "https://www.metacritic.com/movie/" + mTit.replace(/\s/g, '-').toLowerCase();
+                    var rotLink = "https://www.rottentomatoes.com/m/" + mTit.replace(/\s/g, '_').toLowerCase();
+                    var imdbLink = "https://www.imdb.com/title/" + mId;
+                    for (var x = 0; x < jsonRes.Ratings.length; x++){
+                      var src = jsonRes.Ratings[x].Source;
+                      if (src === "Internet Movie Database"){
+                        mIMDB = jsonRes.Ratings[x].Value;
+                        imdbHide = "";
+                      }
+                      else if (src === "Rotten Tomatoes"){
+                        mRotten = jsonRes.Ratings[x].Value;
+                        rottenHide = "";
+                      }
+                      else if (src === "Metacritic"){
+                        mMeta = jsonRes.Ratings[x].Value;
+                        metaHide = "";
+                      }
                     }
-                    else if (src === "Rotten Tomatoes"){
-                      mRotten = jsonRes.Ratings[x].Value;
-                      rottenHide = "";
-                    }
-                    else if (src === "Metacritic"){
-                      mMeta = jsonRes.Ratings[x].Value;
-                      metaHide = "";
-                    }
-                  }
-                  res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear, mId:mId,
-                    movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
-                  metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
-                imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
-              rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
-            likeOpt: likeOption, likeText: likeText,
-            rateCount:numberOfRaters, likeCount:numberOfLikes, avgRATING: averageRating, hiddenRating: hiddenRating, previouslyRated:previouslyRated
-})
-              });
-          }).on('error', function(e){
-                console.log("Got an error: ", e);
-                        //FIX THIS: REDIRECT TO ERROR PAGE?
-                res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
-              })}})}}
+                    res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear, mId:mId,
+                      movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
+                    metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
+                  imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
+                rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
+              likeOpt: likeOption, likeText: likeText,
+              rateCount:numberOfRaters, likeCount:numberOfLikes, avgRATING: averageRating, hiddenRating: hiddenRating, previouslyRated:previouslyRated
+  })});}).on('error', function(e){
+                  console.log("Got an error: ", e);
+                  //FIX THIS: REDIRECT TO ERROR PAGE?
+                  res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})})}}})}}
   else{
     hiddenOUT = "hidden";
     var offQuery = `
@@ -488,9 +496,7 @@ app.route("/movie/:movieid")
           averageRating = results[0].Average;
           numberOfRaters = results[0].RatingNumber;
           numberOfLikes = results[0].Likes;
-        }
-      }
-    })
+        }}})
     https.get(url, function(reso){
         var body = '';
         reso.on('data', function(chunk){
@@ -534,15 +540,11 @@ app.route("/movie/:movieid")
         rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
       likeOpt: likeOption, likeText: likeText,
       rateCount:numberOfRaters, likeCount:numberOfLikes, avgRATING: averageRating, hiddenRating: hiddenRating, previouslyRated:previouslyRated
-    })
-        });
-    }).on('error', function(e){
+    })});}).on('error', function(e){
           console.log("Got an error: ", e);
                   //FIX THIS: REDIRECT TO ERROR PAGE?
           res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
-        })
-  }
-})
+        })}})
 .post(function(req,res){//add to liked list or assign rating
   var hiddenOUT = "";
   var hiddenIN = "";
