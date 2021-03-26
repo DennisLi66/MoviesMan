@@ -6,7 +6,7 @@ const ejs = require("ejs");
 const cookieParser = require('cookie-parser'); //FIX THIS: UPDATE COOKIES ON VISITING SITES
 const mysql = require('mysql'); //FIX THIS: Maybe only open connections in functions, then close them immediately
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer'); //FIX THIS: ADD RECOVERY FOR PASSWORD
+const nodemailer = require('nodemailer');
 const randomatic = require('randomatic');
 const imdb = require('imdb-api');
 //FIX THIS - ADD MOST LIKED MOVIES, MOST HIGHLY RATED AMONG USERS
@@ -151,6 +151,7 @@ app.route("/login")
                 let cookieObj = {
                   name: results[0].username,
                   email: results[0].email,
+                  id: results[0].userID,
                   temporary: false
                 }
                 res.cookie("userData",cookieObj,{expires:new Date(500000 + Date.now())}); //FIX THIS INTO LONGER TIME BASED COOKIE
@@ -644,24 +645,52 @@ app.get("/profile",function(req,res){ //go to user's specfic profile, or redirec
     res.redirect("/");
   }
 })
-app.get("/profile/:username",function(req,res){
+app.route("/profile/:userID")
+.get(function(req,res){
   // FIX THIS: PREVENT BOGUS PROFILE NAMES
   // FIX THIS: Add hiddenOwner
   //FIX THIS: to add this feature profile usernames must be unique
   //FIX THIS: Probably only have a list of movies user is interested in
-  var profUser = req.params.username;
+  var profID = req.params.userID;
+  var userEmail = req.params.email;
+  var profUser = "";
+  var hiddenOUT = "hidden";
+  var hiddenIN = "";
+  var username = "";
+  var notOwnerHidden = "hidden";
   if (req.cookies.userData){
-    var username = req.cookies.userData.name;
-    if (username === profUser){
-      res.render('profile',{hiddenIN: 'hidden', hiddenOUT: '', profuser: profUser});
+    if (req.cookies.userData.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
     }
     else{
-      res.render('profile',{hiddenIN: 'hidden', hiddenOUT: '', profuser: profUser})
+      hiddenIN = "hidden";
+      hiddenOUT = "";
+      if (profID == req.cookies.userID){
+        notOwnerHidden = "";
+      }
     }
   }
-  else{
-    res.render('profile',{hiddenIN: '', hiddenOUT: 'hidden', profuser: profUser})
-  }
+    var sQuery =
+    `
+    `;
+    connection.query(sQuery,[],function(erro,results,fields){
+      if (erro){
+        console.log(erro);
+        res.render('profile',{hiddenIN: hiddenIN, hiddenOUT: hiddenOUT, profuser: profUser}); //FIX THIS
+      }
+      else{
+        if (results.length == 0){ // Log the Users ID, Username, change password link, and empty lists
+
+        }
+      }
+    })
+
+
+
+
+})
+.delete(function(req,res){//remove a liked element
 })
 app.route("/changePassword")
   .get(function(req,res){

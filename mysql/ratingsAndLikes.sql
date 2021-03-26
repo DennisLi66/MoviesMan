@@ -1,13 +1,14 @@
+use movieManDB;
 -- gets all the likes and ratings
 SELECT * from (
-SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber ,ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM 
-(select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a
+SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(a.movieName,c.movieName) as moviename,ifnull(RatingNumber,0) as RatingNumber ,ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM 
+(select imdbID, movieName ,count(*) as Likes from likeList GROUP BY imdbID) a
 LEFT JOIN 
-(select imdbID,count(*) as RatingNumber,avg(rating) as Average from ratingsList GROUP BY imdbID) c ON a.imdbID = c.imdbID
+(select imdbID,count(*) as RatingNumber, movieName ,avg(rating) as Average from ratingsList GROUP BY imdbID) c ON a.imdbID = c.imdbID
 UNION ALL
-SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber, ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM 
-(select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a RIGHT JOIN 
-(select imdbID,count(*) as RatingNumber, avg(rating) as Average from ratingsList GROUP BY imdbID) c 
+SELECT ifnull(a.imdbID,c.imdbID) as imdbID,ifnull(a.movieName,c.movieName) as moviename, ifnull(RatingNumber,0) as RatingNumber, ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM 
+(select imdbID,movieName ,count(*) as Likes from likeList GROUP BY imdbID) a RIGHT JOIN 
+(select imdbID,movieName ,count(*) as RatingNumber, avg(rating) as Average from ratingsList GROUP BY imdbID) c 
 ON a.imdbID = c.imdbID
 WHERE a.imdbID IS NULL
 ) b;
