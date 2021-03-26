@@ -658,6 +658,11 @@ app.route("/profile/:userID")
   var hiddenIN = "";
   var username = "";
   var notOwnerHidden = "hidden";
+  var likedRated = [];
+  var hasLiked = "hidden";
+  var hasRated = "hidden";
+  var noLikes = "";
+  var noRates = "";
   if (req.cookies.userData){
     if (req.cookies.userData.temporary){
       res.clearCookie('userData');
@@ -673,22 +678,45 @@ app.route("/profile/:userID")
   }
     var sQuery =
     `
+    select userID, username, users.email as email, imdbID,title,Rating,Liked
+    from users
+    LEFT JOIN
+    (
+    select ifnull(likeList.email,rl.email) as email, ifnull(likeList.imdbID,rl.imdbID) as imdbID,ifnull(rl.movieName,likelist.movieName) as title, if(rl.rating is null,0,rl.rating) as Rating, if(likeList.imdbID is null,"Unliked","Liked") as Liked
+    from likeList
+    left join
+    (select * from ratingsList) rL
+    on likeList.email = rL.email AND likeList.imdbID = rL.imdbID
+    UNION ALL
+    (select ifnull(likeList.email,rl.email) as email, ifnull(likeList.imdbID,rl.imdbID) as imdbID,ifnull(rl.movieName,likelist.movieName) as title, if(rl.rating is null,0,rl.rating) as Rating, if(likeList.imdbID is null,"Unliked","Liked") as Liked
+    from likeList
+    right join
+    (select * from ratingsList) rL
+    on likeList.email = rL.email AND likeList.imdbID = rL.imdbID WHERE likeList.email is null)
+    ) details
+    ON details.email = users.email
+    WHERE userID = ?
     `;
-    connection.query(sQuery,[],function(erro,results,fields){
+    connection.query(sQuery,[profID],function(erro,results,fields){
       if (erro){
         console.log(erro);
-        res.render('profile',{hiddenIN: hiddenIN, hiddenOUT: hiddenOUT, profuser: profUser}); //FIX THIS
+        res.render('profile',{hiddenIN: hiddenIN, hiddenOUT: hiddenOUT, profuser: profUser,
+          likedRated: likedRated, hasLiked: hasLiked, hasRated: hasRated, noLikes:noLikes, noRates:noRates}); //FIX THIS
       }
       else{
-        if (results.length == 0){ // Log the Users ID, Username, change password link, and empty lists
-
+        if (results.length == 0){ // No Such user Exists
+          console.log("No such user exists with that id.");
+          res.redirect("/");
+        }
+        else{
+          profUser = results[0].username;
+          liekdRated = results;
+          res.render('profile',{hiddenIN: hiddenIN, hiddenOUT: hiddenOUT, profuser: profUser,
+            likedRated: likedRated, hasLiked: hasLiked, hasRated: hasRated, noLikes:noLikes, noRates:noRates
+          })
         }
       }
     })
-
-
-
-
 })
 .delete(function(req,res){//remove a liked element
 })
