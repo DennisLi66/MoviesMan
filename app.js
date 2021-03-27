@@ -710,7 +710,11 @@ app.route("/profile/:userID")
         }
         else{
           profUser = results[0].username;
-          liekdRated = results;
+          likedRated = results;
+          // check results for a rating and like, then break if both
+          for (var x = 0; x < results.length; x++){
+            
+          }
           res.render('profile',{hiddenIN: hiddenIN, hiddenOUT: hiddenOUT, profuser: profUser,
             likedRated: likedRated, hasLiked: hasLiked, hasRated: hasRated, noLikes:noLikes, noRates:noRates
           })
