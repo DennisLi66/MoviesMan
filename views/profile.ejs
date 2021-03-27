@@ -4,7 +4,22 @@
 <h4><%= profuser %>'s page</h4>
 <h3><%= profuser %>'s Likes</h3>
 <div <%= noLikes %>> <%= profuser %> has not liked any movies. </div>
-<div> </div>
+<ul>
+<% for(var i = 0; i < lR.length; i++) { %>
+<% if (lR[i].Liked){ %>
+  <a href=<%=  process.env.HTTPSURL + "/movie/" + lR[i].imdbID %>>  <%= lR[i].title%></a>
+  <a href=<%=  process.env.HTTPSURL + "/profile/" + profID + "/delete/" + lR[i].imdbID %> <%= notOwnerHidden %>> Unlike</a>
+  <br>
+<% }} %>
+</ul>
 <h3><%= profuser %>'s Ratings</h3>
 <div <%= noRates %>> <%= profuser %> has not rated any movies. </div>
+<ul>
+  <% for(var i = 0; i < lR.length; i++) { %>
+  <% if (lR[i].Rating){ %>
+  <a href=<%=  process.env.HTTPSURL + "/movie/" + lR[i].imdbID %>>  <%= lR[i].title%></a>
+    <%= lR[i].Rating %>
+    <br>
+  <% }} %>
+</ul>
 <%- include('partials/footer') %>

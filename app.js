@@ -659,8 +659,6 @@ app.route("/profile/:userID")
   var username = "";
   var notOwnerHidden = "hidden";
   var likedRated = [];
-  var hasLiked = "hidden";
-  var hasRated = "hidden";
   var noLikes = "";
   var noRates = "";
   if (req.cookies.userData){
@@ -701,7 +699,9 @@ app.route("/profile/:userID")
       if (erro){
         console.log(erro);
         res.render('profile',{hiddenIN: hiddenIN, hiddenOUT: hiddenOUT, profuser: profUser,
-          likedRated: likedRated, hasLiked: hasLiked, hasRated: hasRated, noLikes:noLikes, noRates:noRates}); //FIX THIS
+          likedRated: likedRated,  noLikes:noLikes, noRates:noRates, notOwnerHidden:notOwnerHidden,
+          profID: profID
+        }); //FIX THIS
       }
       else{
         if (results.length == 0){ // No Such user Exists
@@ -713,10 +713,19 @@ app.route("/profile/:userID")
           likedRated = results;
           // check results for a rating and like, then break if both
           for (var x = 0; x < results.length; x++){
-            
+            if (results[x].Rating){
+              noRates = "hidden";
+            }
+            if (results[x].Liked){
+              noLikes = "hidden";
+            }
+            if (noLikes === "hidden" && noRates === "hidden"){
+              break;
+            }
           }
           res.render('profile',{hiddenIN: hiddenIN, hiddenOUT: hiddenOUT, profuser: profUser,
-            likedRated: likedRated, hasLiked: hasLiked, hasRated: hasRated, noLikes:noLikes, noRates:noRates
+            lR: likedRated,  noLikes:noLikes, noRates:noRates,notOwnerHidden:notOwnerHidden,
+            profID: profID
           })
         }
       }
