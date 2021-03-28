@@ -7,10 +7,10 @@
     <input type="email" name="email" required>
     <label for="username">Username</label>
     <input type="text" name="username" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" required>
+    <label for="password">Password (Must be 8 characters or more and consist of numbers, letters, or symbols)</label>
+    <input type="password" name="password" pattern="[a-zA-z0-9-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]{8,}" required>
     <label for="password">Confirm Password</label>
-    <input type="password" name="cPassword" required>
+    <input type="password" name="cPassword" pattern="[a-zA-z0-9-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]{8,}" required>
   <button type="submit" class="btn btn-dark">Register</button>
 </form>
 
