@@ -403,7 +403,85 @@ app.route("/movie/:movieid")
         else{
           console.log(results);
           if (results.length == 0){ //no ratings or likes yet
-            console.log("Not Yet Liked or Rated, Using Defaults...")
+            console.log("Not Yet Liked or Rated, Using Defaults...");
+            hiddenOUT = "hidden";
+            var offQuery = `
+            SELECT * from (
+            SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber ,ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM
+            (select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a
+            LEFT JOIN
+            (select imdbID,count(*) as RatingNumber,avg(rating) as Average from ratingsList GROUP BY imdbID) c ON a.imdbID = c.imdbID
+            UNION ALL
+            SELECT ifnull(a.imdbID,c.imdbID) as imdbID, ifnull(RatingNumber,0) as RatingNumber, ifnull(Likes,0) as Likes, ifnull(Average,0) as Average FROM
+            (select imdbID,count(*) as Likes from likeList GROUP BY imdbID) a RIGHT JOIN
+            (select imdbID,count(*) as RatingNumber, avg(rating) as Average from ratingsList GROUP BY imdbID) c
+            ON a.imdbID = c.imdbID
+            WHERE a.imdbID IS NULL
+          ) b WHERE imdbID = ?;
+            `
+            connection.query(offQuery,[mId],function(error,results,fields){
+              if (error){
+                console.log(error);
+                res.redirect("/movie/" + mId);
+              }
+              else if (results){
+                if (results.length == 0){
+                  console.log("Not Yet Liked or Rated, Using Defaults...")
+                }
+                else{
+                  console.log(results[0]);
+                  averageRating = results[0].Average;
+                  numberOfRaters = results[0].RatingNumber;
+                  numberOfLikes = results[0].Likes;
+                }}})
+            https.get(url, function(reso){
+                var body = '';
+                reso.on('data', function(chunk){
+                    body += chunk;
+                });
+                reso.on('end', function(){
+                    var jsonRes = JSON.parse(body);
+                    //console.log("Got a response: ", jsonRes);
+                    var mTit = jsonRes.Title;
+                    var mRated = jsonRes.Rated;
+                    var mPlot = jsonRes.Plot;
+                    var poster = jsonRes.Poster;
+                    var mYear = jsonRes.Year;
+                    var mDir = jsonRes.Director;
+                    var mGenre = jsonRes.Genre;
+                    var mMeta, mRotten, mIMDB;
+                    var metaHide, imdbHide, rottenHide;
+                    metaHide = imdbHide = rottenHide = "hidden";
+                    var metaLink = "https://www.metacritic.com/movie/" + mTit.replace(/\s/g, '-').toLowerCase();
+                    var rotLink = "https://www.rottentomatoes.com/m/" + mTit.replace(/\s/g, '_').toLowerCase();
+                    var imdbLink = "https://www.imdb.com/title/" + mId;
+                    for (var x = 0; x < jsonRes.Ratings.length; x++){
+                      var src = jsonRes.Ratings[x].Source;
+                      if (src === "Internet Movie Database"){
+                        mIMDB = jsonRes.Ratings[x].Value;
+                        imdbHide = "";
+                      }
+                      else if (src === "Rotten Tomatoes"){
+                        mRotten = jsonRes.Ratings[x].Value;
+                        rottenHide = "";
+                      }
+                      else if (src === "Metacritic"){
+                        mMeta = jsonRes.Ratings[x].Value;
+                        metaHide = "";
+                      }
+                    }
+                    res.render("movie",{hiddenOUT: hiddenOUT,hiddenIN: hiddenIN, movieYear:mYear, mId:mId,
+                      movieTitle:mTit,moviePlot:mPlot,movieRating:mRated,moviePoster:poster,
+                    metaHidden:metaHide, metaLink: metaLink, metaRating: mMeta,
+                  imdbHidden: imdbHide, imdbLink: imdbLink, imdbRating: mIMDB,
+                rotHidden:rottenHide, rotLink: rotLink, rotRating: mRotten,
+              likeOpt: likeOption, likeText: likeText,
+              rateCount:numberOfRaters, likeCount:numberOfLikes, avgRATING: averageRating, hiddenRating: hiddenRating, previouslyRated:previouslyRated
+            })});}).on('error', function(e){
+                  console.log("Got an error: ", e);
+                          //FIX THIS: REDIRECT TO ERROR PAGE?
+                  res.redirect("search",{errHidden: "hidden",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN})
+                })
           }
           else if (results.length >= 1){
             console.log(results[0]);
@@ -411,8 +489,8 @@ app.route("/movie/:movieid")
             numberOfRaters = results[0].RatingNumber;
             numberOfLikes = results[0].Likes;
             if (results[0].Rating){
-              var previouslyRated = results[0].Rating;
-              var hiddenRating = "";
+              previouslyRated = results[0].Rating;
+              hiddenRating = "";
             }
             if (results[0].Liked){
               if (results[0].Liked === "Liked"){
@@ -587,9 +665,6 @@ app.route("/movie/:movieid")
           res.redirect("/movie/" + req.params.movieid);
         })
       }
-
-//FIX THIS ADD UNIQUE AND PRIMARY KEYS
-
     }
     else if (req.body.selfRating){
       console.log("Adding to Rating List...")
@@ -636,7 +711,7 @@ app.get("/profile",function(req,res){ //go to user's specfic profile, or redirec
       res.redirect("/");
     }
     else{
-      var username = req.cookies.userData.name;
+      var username = req.cookies.userData.id;
       res.redirect("/profile/" + username);
     }
   }
@@ -647,10 +722,6 @@ app.get("/profile",function(req,res){ //go to user's specfic profile, or redirec
 })
 app.route("/profile/:userID")
 .get(function(req,res){
-  // FIX THIS: PREVENT BOGUS PROFILE NAMES
-  // FIX THIS: Add hiddenOwner
-  //FIX THIS: to add this feature profile usernames must be unique
-  //FIX THIS: Probably only have a list of movies user is interested in
   var profID = req.params.userID;
   var userEmail = req.params.email;
   var profUser = "";
@@ -669,7 +740,7 @@ app.route("/profile/:userID")
     else{
       hiddenIN = "hidden";
       hiddenOUT = "";
-      if (profID == req.cookies.userID){
+      if (profID == req.cookies.userData.id){
         notOwnerHidden = "";
       }
     }
@@ -731,8 +802,38 @@ app.route("/profile/:userID")
       }
     })
 })
-.delete(function(req,res){//remove a liked element
+
+app.get("/profile/:userID/delete/:mID",function(req,res){
+  var mID = req.params.mID;
+  var userID = req.params.userID;
+  console.log(mID);
+  console.log(userID);
+  if (req.cookies.userData){
+    if (req.cookies.userData.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      res.redirect("/login");
+    }
+    else{
+      if (userID == req.cookies.userData.id){ //correct entrance
+        var dQuery =  "DELETE FROM likeList WHERE email = ? AND imdbID = ?";
+        connection.query(dQuery,[req.cookies.userData.email,mID],function(error,results,fields){
+          if (error){
+            console.log(error);
+          }
+            res.redirect("/profile/" + userID);
+        })
+      }
+      else{
+        res.redirect("/login");
+      }
+    }
+  }
+  else{ //user not logged in
+    res.redirect("/login")
+  }
 })
+
 app.route("/changePassword")
   .get(function(req,res){
     if (req.cookies.userData){
