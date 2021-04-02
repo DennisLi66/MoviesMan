@@ -30,8 +30,26 @@ create table ratingsList(
 imdbID varchar(255) NOT NULL,
 movieName varchar(255) NOT NULL,
 rating int NOT NULL,
+-- textbox varchar(255) NOT NULL,
 CONSTRAINT RL PRIMARY KEY (email,imdbID)
 );
+
+-- recent likes
+create table recentLikes(
+imdbID varchar(255) NOT NULL,
+poster varchar(255) NOT NULL,
+recency date
+);
+-- recent reviews
+create table recentReviews(
+imdbID varchar(255) NOT NULL,
+poster varchar(255) NOT NULL,
+userID varchar(255) NOT NULL,
+username varchar(255) NOT NULL,
+recency date
+-- ,textbox varchar(255) NOT NULL
+)
+
 
 
 
