@@ -5,10 +5,12 @@ body{
 .errorMessage{
   background-color: red;
   color: white;
+  text-align: center;
 }
 .confMsg{
   background-color: green;
   color: white;
+    text-align: center;
 }
 .navBar{
   background-color: pink;
