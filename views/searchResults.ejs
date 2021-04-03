@@ -1,28 +1,29 @@
 <%- include('partials/header') %>
-<!-- Should probably show recent / recent popular movies -->
 <%- include('partials/navbar') %>
-<h1> Search Page </h1>
+<h1 style="text-align:center"> Search Page </h1>
 <div class="errorMessage" <%= errHidden %>> There were no results. </div>
-<form action="/search" method="GET">
-    <label for="title">Name of Movie:</label>
-    <input type="input" name="title" required>
-  <button type="submit" class="btn btn-dark">Submit</button>
+<form action="/search" method="GET" style="text-align:center">
+    <input type="input" name="title" placeholder="Enter Movie Title ..." style="padding: 10px" required><br>
+  <button type="submit" class="btn btn-info btn-lg" >Submit</button>
 </form>
-
-<ul>
+<div class="row" style="padding: 10px; width: 100%">
 <% for(var i = 0; i < sResults.length; i++) { %>
 <% if (sResults[i].type === "movie"){ %>
-  <div class="resultBox">
-    <div class="resultBoxHalf">
-      <img class="rbImg" src=<%= sResults[i].poster %> onerror="this.src='/images/altImage.png'">
-    </div>
-    <div class="resultBoxHalf">
-          <a href= <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %> > <%= sResults[i].title %> </a>
-          <li> <%= sResults[i].year %> </li>
-      </div>
-  </div>
 
+<div class="col-lg-4 col-md-6 col-sm-12">
+<div class="card">
+  <div class="card-header">
+          <a href= <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %> > <%= sResults[i].title %> </a>
+  </div>
+  <div class="card-body">
+              <a href= <%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %> > <img class="rbImg" src=<%= sResults[i].poster %> onerror="this.src='/images/altImage.png'"> </a>
+  </div>
+  <div class="card-footer">
+  <%=   sResults[i].year%>
+    </div>
+</div>
+</div>
 <% }} %>
-</ul>
+</div>
 
 <%- include('partials/footer') %>

@@ -3,7 +3,7 @@
 <%- include('partials/navbar') %>
 
 <h1> <%= movieTitle%> </h1>
-<img src=<%= moviePoster%> alt="Movie Poster For <%= movieTitle%>">
+<img class="moviePoster" src=<%= moviePoster%> onerror="this.src='/images/altImage.png'" alt="Movie Poster For <%= movieTitle%>">
 <br>
 Release Year: <%= movieYear %>
 <br>
