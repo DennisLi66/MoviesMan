@@ -2,16 +2,48 @@
 <!-- Should probably show recent / recent popular movies -->
 <%- include('partials/navbar') %>
 <div class="errorMessage" <%= errHidden %>><%= errorMsg %></div>
-<form action="/register" method="POST">
-    <label for="email">Email</label><br>
-    <input type="email" name="email" required><br>
-    <label for="username">Username</label><br>
-    <input type="text" name="username" required><br>
-    <label for="password">Password (Must be 8 characters or more and consist of numbers, letters, or symbols)</label><br>
-    <input type="password" name="password" pattern="[a-zA-z0-9-!$%^&*()_+|~=`{}\[\]:;<>?,.\/]{8,}" required><br>
-    <label for="password">Confirm Password</label><br>
-    <input type="password" name="cPassword" pattern="[a-zA-z0-9-!$%^&*()_+|~=`{}\[\]:;<>?,.\/]{8,}" required><br>
-  <button type="submit" class="btn btn-dark">Register</button>
-</form>
+<div class="row" style="width:100%">
 
+  <div class="col" style="margin: 70px; color:black; text-align:center;">
+    <div class="card">
+      <div class="card-header">
+        Features
+        </div>
+        <div class="card-body">
+
+            Save movies to your list of likes.  <br>
+            Rate movies from a scale of 1 to 10. <br>
+            Leave reviews for movies. <br>
+            Have a profile to track the above information
+
+          </div>
+      </div>
+  </div>
+  <div class="col" style="text-align:center; color: black">
+  <div class="card">
+    <div class="card-header">
+    <h1> Registration </h1>
+      </div>
+
+
+<div class="card-body">
+    <form action="/register" method="POST">
+      <label for="email">Email</label><br>
+      <input type="email" name="email" required><br>
+      <label for="username">Username</label><br>
+      <input type="text" name="username" required><br>
+      <label for="password">Password <br> (Must be 8 characters or more and consist of numbers, letters, or symbols)</label><br>
+      <input type="password" name="password" pattern="[a-zA-z0-9-!$%^&*()_+|~=`{}\[\]:;<>?,.\/]{8,}" required><br>
+      <label for="password">Confirm Password</label><br>
+      <input type="password" name="cPassword" pattern="[a-zA-z0-9-!$%^&*()_+|~=`{}\[\]:;<>?,.\/]{8,}" required><br><br>
+      <button type="submit" class="btn btn-light">Register</button>
+    </form>
+</div>
+
+    <div class="card-footer">
+<a href="/login"> Already a Member? Log in! </a><br>
+    </div>
+  </div>
+</div>
+</div>
 <%- include('partials/footer') %>

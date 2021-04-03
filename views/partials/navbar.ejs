@@ -1,28 +1,34 @@
-<nav class="navbar navbar-expand-lg bg-light" style="width:100%">
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <a class="nav-link" href="/">Home</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="/about">About</a>
-    </li>
-    <li class="nav-item" <%= hiddenOUT %>>
-      <a class="nav-link" href="/profile">Profile</a>
-    </li>
-    <li class="nav-item" <%= hiddenIN %>>
-      <a class="nav-link" href="/register">Register</a>
-    </li>
-    <li class="nav-item" <%= hiddenIN %>>
-      <a class="nav-link" href="/login">Login</a>
-    </li>
-    <li class="nav-item" <%= hiddenOUT %>>
-      <a class="nav-link" href="">Logout</a>
-    </li>
-  </ul>
+<nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
+  <a class="navbar-brand" style="padding-left:10px" href="/">MoviesMan</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
-  <form action="/search" method="GET">
-      <input type="input" name="title" placeholder="Enter Movie Title ..." required>
-    <button type="submit" class="btn btn-dark">Search</button><br>
-  </form>
+  <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+    <ul class="navbar-nav ml-auto" style="padding-left:10px">
+      <li class="nav-item">
+        <a class="nav-link" href="/">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/about">About</a>
+      </li>
+      <li class="nav-item" <%= hiddenOUT %>>
+        <a class="nav-link" href="/profile">Profile</a>
+      </li>
+      <li class="nav-item" <%= hiddenIN %>>
+        <a class="nav-link" href="/register">Register</a>
+      </li>
+      <li class="nav-item" <%= hiddenIN %>>
+        <a class="nav-link" href="/login">Login</a>
+      </li>
+      <li class="nav-item" <%= hiddenOUT %>>
+        <a class="nav-link" href="">Logout</a>
+      </li>
+    </ul>
+    <form action="/search" method="GET" style="padding-left:10px">
+        <input type="input" name="title" placeholder="Enter Movie Title ..." required>
+      <button type="submit" class="btn btn-dark">Search</button><br>
+    </form>
+  </div>
 
-  </nav>
+</nav>
