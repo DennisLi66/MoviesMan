@@ -2,11 +2,24 @@
 <!-- Should probably show recent / recent popular movies -->
 <%- include('partials/navbar') %>
 <div class="confMsg" <%= confHidden %>> We have sent an email to <%= confMsg %>. </div>
-<div class="errorMessage" <%= errHidden %> ><%= errorMsg %></div>
-<h4> Please enter the email of the user to send a recovery email to. </h4>
-<form action="/forgot" method="POST">
-    <label for="email">Email</label>
-    <input type="email" name="email" required>
-  <button type="submit" class="btn btn-dark">Submit</button>
-</form>
+<div class="errorMessage" <%= errHidden %>><%= errorMsg %></div>
+
+<div class="card" style="color:black; text-align:center; width: 75%; left: 12.5%">
+  <div class="card-header">
+    <h1> Password Recovery Page </h1>
+    <h4> Please enter the email of the user to send a recovery email to. </h4>
+  </div>
+  <div class="card-body">
+    <form action="/forgot" method="POST">
+      <label for="email">Email</label>
+      <input type="email" name="email" required>
+      <button type="submit" class="btn btn-dark">Submit</button>
+    </form>
+  </div>
+  <div class="card-footer">
+    <a href="/register">Don't Have an Account?</a><br>
+    <a href="/login">Remember Your Password?</a>
+  </div>
+</div>
+
 <%- include('partials/footer') %>

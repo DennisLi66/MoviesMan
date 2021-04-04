@@ -1,23 +1,25 @@
 <%- include('partials/header') %>
 <!-- Should probably show recent / recent popular movies -->
 <%- include('partials/navbar') %>
-<div class="errorMessage"<%= errHidden %>><%= errorMsg %></div>
-<div class="confMsg"<%= confHidden %> ><%= confMsg %> has now been registered! </div>
+<div class="errorMessage" <%= errHidden %>><%= errorMsg %></div>
+<div class="confMsg" <%= confHidden %>><%= confMsg %> has now been registered! </div>
 <div><br><br></div>
 <div class="card" style="color:black; text-align:center; width: 50%; left:25%; top:20%">
-<div class="card-header"><h1>Login</h1></div>
-<div class="card-body">
-<form action="/login" method="POST">
-    <label for="email">Email</label><br>
-    <input type="email" name="username" required><br>
-    <label for="password">Password</label><br>
-    <input type="password" name="password" required><br>
-  <button type="submit" class="btn btn-dark">Login</button>
-</form>
-</div>
-<div class="card-footer">
-  <a href="/register"> Not Already A Member? </a><br>
-  <a href="/forgot"> Forgot Your Password? </a>
+  <div class="card-header">
+    <h1>Login</h1>
+  </div>
+  <div class="card-body">
+    <form action="/login" method="POST">
+      <label for="email">Email</label><br>
+      <input type="email" name="username" required><br>
+      <label for="password">Password</label><br>
+      <input type="password" name="password" required><br>
+      <button type="submit" class="btn btn-dark">Login</button>
+    </form>
+  </div>
+  <div class="card-footer">
+    <a href="/register"> Not Already A Member? </a><br>
+    <a href="/forgot"> Forgot Your Password? </a>
   </div>
 </div>
 <%- include('partials/footer') %>
