@@ -30,9 +30,13 @@ create table ratingsList(
 imdbID varchar(255) NOT NULL,
 movieName varchar(255) NOT NULL,
 rating int NOT NULL,
--- textbox varchar(255) NOT NULL,
+textbox varchar(255),
 CONSTRAINT RL PRIMARY KEY (email,imdbID)
 );
+
+-- ALTER TABLE ratingsList
+-- ADD textbox varchar(255);
+
 
 -- recent likes
 create table recentLikes(
@@ -47,11 +51,8 @@ poster varchar(255) NOT NULL,
 userID varchar(255) NOT NULL,
 username varchar(255) NOT NULL,
 recency date
--- ,textbox varchar(255) NOT NULL
+,textbox varchar(255)
 )
-
-
-
 
 -- drop table likeList;
 -- drop table ratingsList;
