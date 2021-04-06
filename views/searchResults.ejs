@@ -11,7 +11,7 @@
   <% if (sResults[i].type === "movie"){ %>
 
   <div class="col-lg-4 col-md-6 col-sm-12">
-    <div class="card">
+    <div class="card" style="height: 450px">
       <div class="card-header">
         <a href=<%=  process.env.HTTPSURL + "/movie/" + sResults[i].imdbid %>> <%= sResults[i].title %> </a>
       </div>

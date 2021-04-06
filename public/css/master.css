@@ -27,8 +27,8 @@ body{
 }
 
 .rbImg{
-  height:300px;
-  width:auto;
+  max-height: 300px;
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
   display: block;
@@ -43,3 +43,8 @@ body{
   color: black;
   text-align: center;
 }
+
+/* .card{
+  color:black;
+  height: 450px
+} */

@@ -1,0 +1,33 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<h2 style="text-align:center"> Recently Liked Movies </h2>
+
+<% if (movies.length == 0){ %>
+Sorry, there were no recent movies liked.
+<% }else{ %>
+<div class="row" style="width:100%">
+  <% for (let x = 0; x < movies.length; x++){ %>
+  <div class="col-lg-2 col-md-4 col-sm-12">
+    <div class="card" style="height: 450px">
+      <div class="card-header">
+        <a href= <%=  process.env.HTTPSURL + "/movie/" + movies[x].imdbID %>> <%= movies[x].title %> </a>
+      </div>
+      <div class="card-body">
+      <a href= <%=  process.env.HTTPSURL + "/movie/" + movies[x].imdbID %>>  <img class="rbImg" src="<%= movies[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= movies[x].title %>"></a>
+
+      </div>
+      <div class="card-footer">
+        <% if (movies[x].totalLikes == 1){%>
+        Someone has liked this movie.
+        <% } else { %>
+        <%= movies[x].totalLikes%> people have liked this movie.
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <% } %>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>

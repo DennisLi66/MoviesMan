@@ -41,6 +41,7 @@ CONSTRAINT RL PRIMARY KEY (email,imdbID)
 -- recent likes
 create table recentLikes(
 imdbID varchar(255) NOT NULL,
+mName varchar(255) NOT NULL,
 poster varchar(255) NOT NULL,
 userID int NOT NULL,
 recency datetime
@@ -48,12 +49,13 @@ recency datetime
 -- recent reviews
 create table recentReviews(
 imdbID varchar(255) NOT NULL,
+mName varchar(255) NOT NULL,
 poster varchar(255) NOT NULL,
 userID INT NOT NULL,
 username varchar(255) NOT NULL,
 recency datetime
 ,textbox varchar(255)
-)
+);
 
 -- drop table likeList;
 -- drop table ratingsList;

@@ -52,6 +52,39 @@ app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
     });
   }
 });
+app.get("/recent", function(req, res) {
+  var hiddenOUT = "hidden";
+  var hiddenIN = "";
+  if (req.cookies.userData) {
+    if (req.cookies.userData.temporary) {
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+    } else {
+      hiddenIN = "hidden";
+      hiddenOUT = "";
+    }
+  }
+  var sQuery =
+    `
+  SELECT rLikes.imdbID as imdbID, mName as title, poster, totalLikes FROM
+(select * from recentLikes ORDER BY recency DESC LIMIT 6) rLikes
+left join
+(SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
+ON rLikes.imdbID = tLikes.imdbID
+  `;
+  connection.query(sQuery, function(error, results, fields) {
+    if (error) {
+      res.redirect("/");
+    } else {
+      console.log(results);
+      res.render("recent", {
+        hiddenOUT: hiddenOUT,
+        hiddenIN: hiddenIN,
+        movies: results
+      })
+    }
+  })
+})
 app.get("/about", function(req, res) { //FIX THIS TO ACTUALLY DESCRIBE THE SITE
   if (req.cookies.userData) {
     if (req.cookies.userData.temporary) {
@@ -899,9 +932,9 @@ app.route("/movie/:movieid")
           var query =
             `
           INSERT INTO likeList (email,imdbID,movieName) VALUES (?,?,?);
-          INSERT INTO recentLikes(imdbID,poster,userID,recency) VALUES (?,?,?,NOW());
+          INSERT INTO recentLikes(imdbID,poster,mName,userID,recency) VALUES (?,?,?,?,NOW());
           `;
-          connection.query(query, [req.cookies.userData.email, req.params.movieid, req.body.mname, req.params.movieid, req.body.poster, req.cookies.userData.id], function(eror, results, fields) {
+          connection.query(query, [req.cookies.userData.email, req.params.movieid, req.body.mname, req.params.movieid, req.body.poster, req.body.mname, req.cookies.userData.id], function(eror, results, fields) {
             if (eror) {
               console.log(eror);
             }
@@ -1075,7 +1108,7 @@ app.get("/profile/:userID/delete/:mID", function(req, res) {
     } else {
       if (userID == req.cookies.userData.id) { //correct entrance
         var dQuery = "DELETE FROM likeList WHERE email = ? AND imdbID = ?;           DELETE FROM recentLikes WHERE userID = ? AND imdbID = ?;";
-        connection.query(dQuery, [req.cookies.userData.email, mID,req.cookies.userData.id,mID], function(error, results, fields) {
+        connection.query(dQuery, [req.cookies.userData.email, mID, req.cookies.userData.id, mID], function(error, results, fields) {
           if (error) {
             console.log(error);
           }
