@@ -11,13 +11,13 @@ This user has not liked any movies.
   <div class="col-lg-3 col-md-6 col-sml-12">
     <div class="card" style="height: 425px">
       <div class="card-header">
-        <a href=<%=  process.env.HTTPSURL + "/movie/" + likes[u].imdbID %>>         <%= likes[u].title %> </a>
+        <a href=<%=  process.env.HTTPSURL + "/movie/" + likes[u].imdbID %>> <%= likes[u].title %> </a>
       </div>
       <div class="card-body">
           <a href=<%=  process.env.HTTPSURL + "/movie/" + likes[u].imdbID %>> <img class="rbImg" src=<%= likes[u].poster %> onerror="this.src='/images/altImage.png'"> </a>
       </div>
-      <div class="card-footer">
-        Unlike
+      <div class="card-footer" <%= notOwnerHidden %>>
+        <a href=<%=  process.env.HTTPSURL + "/profile/" + profID + "/delete/" + likes[u].imdbID %> <%= notOwnerHidden %>> Unlike</a>
       </div>
     </div>
   </div>

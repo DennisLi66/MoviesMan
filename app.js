@@ -1163,6 +1163,7 @@ app.get("/profile/:userID/delete/:mID", function(req, res) {
     res.redirect("/login")
   }
 })
+app.get("/profile/:userID/deleteR/:mID",function(req,res){})
 
 app.route("/changePassword")
   .get(function(req, res) {
