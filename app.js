@@ -958,19 +958,31 @@ app.route("/movie/:movieid")
         var query =
           `
       INSERT INTO ratingsList
-        (email, imdbID, movieName, rating)
+        (email, imdbID, movieName, rating, textbox)
       VALUES
-        (?, ?, ?, ?)
+        (?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
-        rating     = VALUES(rating)
+        rating     = VALUES(rating),
+        textbox = VALUES(textbox);
+
+      INSERT INTO recentReviews
+        (imdbID,mName,poster,userID,username, rating ,recency,textbox)
+      VALUES
+        (?,?,?,?,?,?,NOW(),?)
+      ON DUPLICATE KEY UPDATE
+        poster = VALUES(poster),
+        rating = VALUES(rating),
+        recency = VALUES(recency),
+        textbox = VALUES(textbox);
       `
-        var selfRating = f = parseInt(req.body.selfRating);
+        var selfRating = parseInt(req.body.selfRating);
         if (selfRating < 1 || selfRating > 10) {
           console.log("Invalid Number is being used!");
           res.redirect("/movie/" + req.params.movieid);
         } else {
           connection.query(query,
-            [req.cookies.userData.email, req.params.movieid, req.body.mname, selfRating],
+            [req.cookies.userData.email, req.params.movieid, req.body.mname, selfRating, req.body.mReview,
+            req.params.movieid,req.body.mname,req.body.poster,req.cookies.userData.id,req.cookies.userData.name,selfRating,req.body.mReview],
             function(error, results, fields) {
               if (error) {
                 console.log(error);

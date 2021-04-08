@@ -45,6 +45,7 @@
       <div> Number of People who have rated this movie: <%= rateCount %>.</div>
       <div> The average rating of this movie is <%= avgRATING %>.</div>
       <div <%= hiddenRating %>> You've previously rated this <%= previouslyRated %>.</div>
+      <div class="card-text" <%= hiddenRating %>> Old Text Here </div>
       <label for="selfRating" <%= hiddenOUT %>>Choose a Rating:</label><br>
       <select id="selfRating" name="selfRating" <%= hiddenOUT %>>
         <option value="1">1</option>
@@ -59,9 +60,10 @@
         <option value="10">10</option>
       </select>
       <br>
-      <textarea id="mReview" name="mReview" rows="5" cols="50" <%= hiddenOUT %>>
+      <input type="hidden" id="poster" name="poster" value=" <%= moviePoster %> ">
+      <textarea id="mReview" name="mReview" rows="5" cols="50" maxlength="10000" <%= hiddenOUT %>>
       </textarea>
-      <input type="submit" value="Rate" <%= hiddenOUT %>>
+      <br><input type="submit" value="Rate" <%= hiddenOUT %>>
     </form>
   </div>
 </div>

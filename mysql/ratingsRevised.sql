@@ -18,10 +18,10 @@ SELECT rLikes.imdbID as imdbID, mName as title, poster, totalLikes FROM
 (select * from recentLikes ORDER BY recency DESC LIMIT 5) rLikes
 left join
 (SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
-ON rLikes.imdbID = tLikes.imdbID
+ON rLikes.imdbID = tLikes.imdbID;
 
-
-
+select * from recentReviews;
+select * from ratingsList;
 
 --       SELECT * FROM ( SELECT ifnull(email,emul) as email, ifnull(imdbID,Liked) as ID, ifnull(movieName,title) as Title, ifnull(rating,0) as Rating, if(Liked is NULL,"Unliked","Liked") as Liked FROM
 --       (

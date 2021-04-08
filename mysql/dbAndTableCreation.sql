@@ -53,6 +53,7 @@ mName varchar(255) NOT NULL,
 poster varchar(255) NOT NULL,
 userID INT NOT NULL,
 username varchar(255) NOT NULL,
+rating int NOT NULL,
 recency datetime
 ,textbox TEXT,
 CONSTRAINT RL PRIMARY KEY (userID,imdbID)
