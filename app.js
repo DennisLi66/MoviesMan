@@ -1088,11 +1088,11 @@ app.route("/profile/:userID")
       SELECT * FROM
       (select userID,username, email from users where userID = ?) info
       LEFT JOIN
-      (select "Liked" as Chosen, email, imdbID, movieName as title, NULL as rating, NULL as textbox
-      from likelist
+      (select "Liked" as Chosen, email, poster, likeList.imdbID, movieName as title, NULL as rating, NULL as textbox
+      from likelist left join recentLikes on likeList.imdbID = recentLikes.imdbID
       UNION
-      select "Rated" as Chosen, email, imdbID, movieName as title, rating, textbox
-      from ratingsList) lists
+      select "Rated" as Chosen, email, poster, ratingsList.imdbID, movieName as title, ratingsList.rating, ratingsList.textbox
+      from ratingsList left join recentReviews on recentReviews.imdbID = ratingsList.imdbID) lists
       ON lists.email = info.email
     `;
     connection.query(sQuery, [profID], function(erro, results, fields) {
@@ -1118,7 +1118,7 @@ app.route("/profile/:userID")
             if (results[x].Chosen === "Liked") {
               likes.push(results[x]);
             }
-            else{
+            else if (results[x].Chosen === "Rated"){
               rates.push(results[x]);
             }
           }
