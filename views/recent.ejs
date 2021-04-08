@@ -31,5 +31,31 @@ Sorry, there were no recent movies liked.
 <% } %>
 
 <h2 style="text-align:center"> Recently Rated Movies </h2>
+<% if (rates.length == 0){ %>
+Sorry, there were no recent movies rated.
+<% }else{ %>
+  <div class="row" style="width:100%">
+    <% for (let x = 0; x < rates.length; x++){ %>
+    <div class="col-lg-4 col-md-6 col-sm-12">
+      <div class="card" style="height: 450px">
+        <div class="card-header">
+          <a href= <%=  process.env.HTTPSURL + "/movie/" + rates[x].imdbID %>> <%= rates[x].title %> </a><br>
+          Review from <a href= <%=  process.env.HTTPSURL + "/profile/" + rates[x].userID %>> <%= rates[x].username %></a>
+        </div>
+        <div class="card-body">
+        <a href= <%=  process.env.HTTPSURL + "/movie/" + rates[x].imdbID %>>  <img class="rbImg" src="<%= rates[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= rates[x].title %>"></a>
 
+        </div>
+        <div class="card-footer">
+          <% if (rates[x].textbox){%>
+          <%= rates[x].textbox %>
+          <% } else { %>
+          <em> The reviewer didn't leave a text review.</em>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
 <%- include('partials/footer') %>

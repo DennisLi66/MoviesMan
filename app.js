@@ -66,21 +66,39 @@ app.get("/recent", function(req, res) {
   }
   var sQuery =
     `
-  SELECT rLikes.imdbID as imdbID, mName as title, poster, totalLikes FROM
-(select * from recentLikes ORDER BY recency DESC LIMIT 6) rLikes
-left join
-(SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
-ON rLikes.imdbID = tLikes.imdbID
-  `;
+    SELECT "Like" as Chosen, rLikes.imdbID as imdbID, movieName as title, poster, totalLikes, NULL as userID, NULL as username, NULL as rating, NULL as textbox, NULL as Average FROM
+    (select * from recentLikes ORDER BY recency DESC LIMIT 6) rLikes
+    left join
+    (SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
+    ON rLikes.imdbID = tLikes.imdbID
+    UNION
+    SELECT "Rate" as Chosen, recentReviews.imdbID as imdbID, mName as title, poster, NULL as totalLikes, userID, username, rating, textbox, Average FROM
+    -- select recentReviews.imdbID as imdbID, mName as title, poster, userID, username, rating, textbox, Average FROM
+    (SELECT * FROM recentReviews ORDER BY recency DESC LIMIT 6) recentReviews
+    LEFT JOIN
+    (select imdbID,avg(rating) as Average from ratingsList group by imdbID) ratings ON
+    recentReviews.imdbID = ratings.imdbID;
+    `;
   connection.query(sQuery, function(error, results, fields) {
     if (error) {
       res.redirect("/");
     } else {
       console.log(results);
+      var likes = [];
+      var rates = [];
+      for (let u = 0; u < results.length; u++){
+        if (results[u].Chosen === "Like"){
+          likes.push(results[u]);
+        }
+        else{
+          rates.push(results[u]);
+        }
+      }
       res.render("recent", {
         hiddenOUT: hiddenOUT,
         hiddenIN: hiddenIN,
-        movies: results
+        movies: likes,
+        rates: rates
       })
     }
   })
@@ -583,6 +601,7 @@ app.route("/movie/:movieid")
     var hiddenRating = "hidden";
     var url = "https://www.omdbapi.com/?apikey=" + process.env.OMDBAPI + "&i=" + mId;
     if (req.cookies.userData) {
+      console.log(req.cookies.userData.email);
       if (req.cookies.userData.temporary) {
         res.clearCookie('userData');
         console.log(username + " has been logged out.");
@@ -615,7 +634,7 @@ app.route("/movie/:movieid")
             console.log(error);
             res.redirect("/movie/" + req.params.movieid);
           } else {
-            console.log(results);
+            console.log("Here we go! ",results);
             if (results.length == 0) { //no ratings or likes yet
               console.log("Not Yet Liked or Rated, Using Defaults...");
               var offQuery = `
@@ -654,7 +673,15 @@ app.route("/movie/:movieid")
                 });
                 reso.on('end', function() {
                   var jsonRes = JSON.parse(body);
-                  //console.log("Got a response: ", jsonRes);
+                  console.log("Got a response: ", jsonRes);
+        if (jsonRes.Response === "False"){
+                    res.render("search", {
+                      errHidden: "",
+                      hiddenOUT: hiddenOUT,
+                      hiddenIN: hiddenIN
+                    });
+                  }
+                  else{
                   var mTit = jsonRes.Title;
                   var mRated = jsonRes.Rated;
                   var mPlot = jsonRes.Plot;
@@ -707,6 +734,7 @@ app.route("/movie/:movieid")
                     hiddenRating: hiddenRating,
                     previouslyRated: previouslyRated
                   })
+                }
                 });
               }).on('error', function(e) {
                 console.log("Got an error: ", e);
@@ -718,7 +746,6 @@ app.route("/movie/:movieid")
                 })
               })
             } else if (results.length >= 1) {
-              console.log(results[0]);
               averageRating = results[0].Average;
               numberOfRaters = results[0].RatingNumber;
               numberOfLikes = results[0].Likes;
@@ -737,7 +764,15 @@ app.route("/movie/:movieid")
                 });
                 reso.on('end', function() {
                   var jsonRes = JSON.parse(body);
-                  //console.log("Got a response: ", jsonRes);
+                  console.log("Got a response: ", jsonRes);
+        if (jsonRes.Response === "False"){
+                    res.render("search", {
+                      errHidden: "",
+                      hiddenOUT: hiddenOUT,
+                      hiddenIN: hiddenIN
+                    });
+                  }
+                  else{
                   var mTit = jsonRes.Title;
                   var mRated = jsonRes.Rated;
                   var mPlot = jsonRes.Plot;
@@ -790,6 +825,7 @@ app.route("/movie/:movieid")
                     hiddenRating: hiddenRating,
                     previouslyRated: previouslyRated
                   })
+                }
                 });
               }).on('error', function(e) {
                 console.log("Got an error: ", e);
@@ -842,7 +878,15 @@ app.route("/movie/:movieid")
         });
         reso.on('end', function() {
           var jsonRes = JSON.parse(body);
-          //console.log("Got a response: ", jsonRes);
+          console.log("Got a response: ", jsonRes);
+          if (jsonRes.Response === "False"){
+            res.render("search", {
+              errHidden: "",
+              hiddenOUT: hiddenOUT,
+              hiddenIN: hiddenIN
+            });
+          }
+          else{
           var mTit = jsonRes.Title;
           var mRated = jsonRes.Rated;
           var mPlot = jsonRes.Plot;
@@ -895,6 +939,7 @@ app.route("/movie/:movieid")
             hiddenRating: hiddenRating,
             previouslyRated: previouslyRated
           })
+        }
         });
       }).on('error', function(e) {
         console.log("Got an error: ", e);
@@ -1024,9 +1069,8 @@ app.route("/profile/:userID")
     var hiddenIN = "";
     var username = "";
     var notOwnerHidden = "hidden";
-    var likedRated = [];
-    var noLikes = "";
-    var noRates = "";
+    var likes = [];
+    var rates = [];
     if (req.cookies.userData) {
       if (req.cookies.userData.temporary) {
         res.clearCookie('userData');
@@ -1041,24 +1085,15 @@ app.route("/profile/:userID")
     }
     var sQuery =
       `
-    select userID, username, users.email as email, imdbID,title,Rating,Liked
-    from users
-    LEFT JOIN
-    (
-    select ifnull(likeList.email,rl.email) as email, ifnull(likeList.imdbID,rl.imdbID) as imdbID,ifnull(rl.movieName,likelist.movieName) as title, if(rl.rating is null,0,rl.rating) as Rating, if(likeList.imdbID is null,"Unliked","Liked") as Liked
-    from likeList
-    left join
-    (select * from ratingsList) rL
-    on likeList.email = rL.email AND likeList.imdbID = rL.imdbID
-    UNION ALL
-    (select ifnull(likeList.email,rl.email) as email, ifnull(likeList.imdbID,rl.imdbID) as imdbID,ifnull(rl.movieName,likelist.movieName) as title, if(rl.rating is null,0,rl.rating) as Rating, if(likeList.imdbID is null,"Unliked","Liked") as Liked
-    from likeList
-    right join
-    (select * from ratingsList) rL
-    on likeList.email = rL.email AND likeList.imdbID = rL.imdbID WHERE likeList.email is null)
-    ) details
-    ON details.email = users.email
-    WHERE userID = ?
+      SELECT * FROM
+      (select userID,username, email from users where userID = ?) info
+      LEFT JOIN
+      (select "Liked" as Chosen, email, imdbID, movieName as title, NULL as rating, NULL as textbox
+      from likelist
+      UNION
+      select "Rated" as Chosen, email, imdbID, movieName as title, rating, textbox
+      from ratingsList) lists
+      ON lists.email = info.email
     `;
     connection.query(sQuery, [profID], function(erro, results, fields) {
       if (erro) {
@@ -1079,26 +1114,20 @@ app.route("/profile/:userID")
           res.redirect("/");
         } else {
           profUser = results[0].username;
-          likedRated = results;
-          // check results for a rating and like, then break if both
           for (var x = 0; x < results.length; x++) {
-            if (results[x].Rating) {
-              noRates = "hidden";
+            if (results[x].Chosen === "Liked") {
+              likes.push(results[x]);
             }
-            if (results[x].Liked) {
-              noLikes = "hidden";
-            }
-            if (noLikes === "hidden" && noRates === "hidden") {
-              break;
+            else{
+              rates.push(results[x]);
             }
           }
           res.render('profile', {
             hiddenIN: hiddenIN,
             hiddenOUT: hiddenOUT,
             profuser: profUser,
-            lR: likedRated,
-            noLikes: noLikes,
-            noRates: noRates,
+            likes: likes,
+            rates: rates,
             notOwnerHidden: notOwnerHidden,
             profID: profID
           })
