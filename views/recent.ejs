@@ -37,7 +37,7 @@ Sorry, there were no recent movies rated.
   <div class="row" style="width:100%">
     <% for (let x = 0; x < rates.length; x++){ %>
     <div class="col-lg-4 col-md-6 col-sm-12">
-      <div class="card" style="height: 450px">
+      <div class="card">
         <div class="card-header">
           <a href= <%=  process.env.HTTPSURL + "/movie/" + rates[x].imdbID %>> <%= rates[x].title %> </a><br>
           Review from <a href= <%=  process.env.HTTPSURL + "/profile/" + rates[x].userID %>> <%= rates[x].username %></a>

@@ -1148,7 +1148,10 @@ app.get("/profile/:userID/delete/:mID", function(req, res) {
       res.redirect("/login");
     } else {
       if (userID == req.cookies.userData.id) { //correct entrance
-        var dQuery = "DELETE FROM likeList WHERE email = ? AND imdbID = ?;           DELETE FROM recentLikes WHERE userID = ? AND imdbID = ?;";
+        var dQuery =
+        `DELETE FROM likeList WHERE email = ? AND imdbID = ?;
+         DELETE FROM recentLikes WHERE userID = ? AND imdbID = ?;
+         `;
         connection.query(dQuery, [req.cookies.userData.email, mID, req.cookies.userData.id, mID], function(error, results, fields) {
           if (error) {
             console.log(error);
@@ -1156,14 +1159,47 @@ app.get("/profile/:userID/delete/:mID", function(req, res) {
           res.redirect("/profile/" + userID);
         })
       } else {
-        res.redirect("/login");
+        res.redirect("/profile/" + userID);
       }
     }
   } else { //user not logged in
     res.redirect("/login")
   }
 })
-app.get("/profile/:userID/deleter/:mID",function(req,res){})
+app.get("/profile/:userID/deleter/:mID",function(req,res){
+  var mID = req.params.mID;
+  var userID = req.params.userID;
+  console.log(mID);
+  console.log(userID);
+  if(req.cookies.userData){
+    if (req.cookies.userData.temporary){
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+      res.redirect("/login");
+    }
+    else{
+      if (userID == req.cookies.userData.id){
+        var dQuery =
+        `
+        DELETE FROM ratingsList WHERE email = ? AND imdbID = ?;
+        DELETE FROM recentReviews WHERE userID = ? AND imdbID = ?;
+        `;
+        connection.query(dQuery,[req.cookies.userData.email,mID,req.cookies.userData.id,mID],function(error,results,fields){
+          if (error){
+            console.log(error);
+          }
+            res.redirect("/profile/" + userID);
+        })
+      }
+      else{
+        res.redirect("/profile/" + userID);
+      }
+    }
+  }
+  else{
+    res.redirect("/login")
+  }
+})
 
 app.route("/changePassword")
   .get(function(req, res) {

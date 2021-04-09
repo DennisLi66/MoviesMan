@@ -4,7 +4,7 @@
 <h1 style="text-align:center"><%= profuser %>'s page</h1>
 <h3 style="text-align:center"><%= profuser %>'s Likes</h3>
 <% if (likes.length == 0){ %>
-This user has not liked any movies.
+<div style="text-align:center">This user has not liked any movies.</div>
 <%} else {%>
 <div class="row" style="width:100%">
   <%for (let u = 0; u < likes.length; u++){ %>
@@ -27,7 +27,7 @@ This user has not liked any movies.
 <br>
 <h3 style="text-align:center"><%= profuser %>'s Ratings</h3>
 <% if (rates.length == 0){ %>
-This user has not rated any movies.
+<div style="text-align:center">This user has not rated any movies.</div>
 <%} else {%>
 <div class="row" style="width:100%">
   <% for(let f = 0; f < rates.length; f++){%>
