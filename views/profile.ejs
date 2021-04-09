@@ -14,7 +14,7 @@ This user has not liked any movies.
         <a href=<%=  process.env.HTTPSURL + "/movie/" + likes[u].imdbID %>> <%= likes[u].title %> </a>
       </div>
       <div class="card-body">
-          <a href=<%=  process.env.HTTPSURL + "/movie/" + likes[u].imdbID %>> <img class="rbImg" src=<%= likes[u].poster %> onerror="this.src='/images/altImage.png'"> </a>
+        <a href=<%=  process.env.HTTPSURL + "/movie/" + likes[u].imdbID %>> <img class="rbImg" src=<%= likes[u].poster %> onerror="this.src='/images/altImage.png'"> </a>
       </div>
       <div class="card-footer" <%= notOwnerHidden %>>
         <a href=<%=  process.env.HTTPSURL + "/profile/" + profID + "/delete/" + likes[u].imdbID %> <%= notOwnerHidden %>> Unlike</a>
@@ -29,6 +29,23 @@ This user has not liked any movies.
 <% if (rates.length == 0){ %>
 This user has not rated any movies.
 <%} else {%>
-
-<%} %>
-<%- include('partials/footer') %>
+<div class="row" style="width:100%">
+  <% for(let f = 0; f < rates.length; f++){%>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <a href=<%=  process.env.HTTPSURL + "/movie/" + rates[f].imdbID %>> <%= rates[f].title %> </a>
+      </div>
+      <div class="card-body">
+        <a href=<%=  process.env.HTTPSURL + "/movie/" + rates[f].imdbID %>> <img class="rbImg" src=<%= rates[f].poster %> onerror="this.src='/images/altImage.png'"> </a>
+      </div>
+      <div class="card-footer">
+        <%= rates[f].textbox %>
+        <br><br>
+        <a href=<%=  process.env.HTTPSURL + "/profile/" + profID + "/deleter/" + rates[f].imdbID %> <%= notOwnerHidden %>> Delete Rating</a>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <%} %>
+  <%- include('partials/footer') %>
