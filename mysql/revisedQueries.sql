@@ -21,6 +21,4 @@ from ratingsList left join recentReviews on recentReviews.imdbID = ratingsList.i
 ON lists.email = info.email
 ;
 
--- moviePage Query tt1333125
-select * from likeList;
-select * from ratingsList;
+
