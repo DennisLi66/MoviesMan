@@ -33,12 +33,32 @@
   </div>
   <div class="card-footer">
     <% if (rate === '0'){ %>
-      This movie has not been rated by MoviesMan users previously.
-      <% }else { %>
+    This movie has not been rated by MoviesMan users previously.
+    <% }else { %>
     This movie has a MoviesMan collective rating of <%= rate %>.
-    <% } %>
+    <% if (rated === "Unrated"){ %>
+    <br>You have not previously rated this movie before.
+    <% } else if (rated !== ""){ %>
+    <br>You have previously assigned this movie a rating of <%= rated %>.
+    <% }} %>
     <br>
     The number of times MoviesMan users have liked this movie is <%= likes %>.
+    <br><br><br>
+    <div class="row">
+      <% for (let d = 0; d < reviews.length; d++) {%>
+      <div class="col-lg-3 col-md-6 col-sm-12">
+        <div class="card">
+          <div class="card-header">
+            Reviewer: <a href=<%="/profile/" + reviews[d].userId%>><%= reviews[d].username%></a><br>
+            Rating: <%= reviews[d].rating%><br>
+          </div>
+          <div class="card-body">
+            <%= reviews[d].textbox %>
+          </div>
+        </div>
+      </div>
+      <% }%>
+    </div>
   </div>
 </div>
 <%- include('partials/footer') %>

@@ -604,38 +604,33 @@ app.route("/movie/:movieid")
       } else {
         hiddenIN = "hidden";
         hiddenOUT = "";
-        sQuery =
-          `
-        `;
         variables = [];
       }
     }
-    else {
-      sQuery =
-        `
-      SELECT * FROM
-      (select rL.imdbID as imdbID, movieName as title, ifnull(Likes,0) as Likes, Average, users.userId, users.username, if(liked.imdbID is null,"False","True") as Liked ,rating, textbox from
-      ratingsList left join  (select imdbID, avg(rating) as Average from ratingsList GROUP BY imdbID) rL
-      ON rL.imdbID = ratingsList.imdbID
-      left join users ON users.email = ratingsList.email
-      left join (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
-      ON likes.imdbID = ratingsList.imdbID left join
-      (select imdbID, email from likelist GROUP BY imdbID) liked
-      on liked.email = ratingsList.email AND liked.imdbID = ratingsList.imdbID
-      UNION ALL
-       SELECT likeList.imdbID, likeList.movieName as title, Likes, ifnull(Average,0) as Average, users.userId, users.username, "True" as Liked, ifnull(rating,0) as rating, textbox FROM
-      likeList left join
-      (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
-      on likeList.imdbID = likes.imdbID left join
-      (select avg(rating) as Average,imdbID from ratingsList group by imdbID) rL
-      on rL.imdbID = likeList.imdbID left join
-      (select * from ratingsList) rates ON rates.imdbID = likeList.imdbID AND rates.email = likeList.email
-      left join users on users.email = likeList.email WHERE rating is NULL OR rating = 0
-      ) movies
-      WHERE imdbID = ?
-      `;
-      variables.push(req.params.movieid);
-    }
+    sQuery =
+      `
+    SELECT * FROM
+    (select rL.imdbID as imdbID, movieName as title, ifnull(Likes,0) as Likes, Average, users.userId, users.username, if(liked.imdbID is null,"False","True") as Liked ,rating, textbox from
+    ratingsList left join  (select imdbID, avg(rating) as Average from ratingsList GROUP BY imdbID) rL
+    ON rL.imdbID = ratingsList.imdbID
+    left join users ON users.email = ratingsList.email
+    left join (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
+    ON likes.imdbID = ratingsList.imdbID left join
+    (select imdbID, email from likelist GROUP BY imdbID) liked
+    on liked.email = ratingsList.email AND liked.imdbID = ratingsList.imdbID
+    UNION ALL
+     SELECT likeList.imdbID, likeList.movieName as title, Likes, ifnull(Average,0) as Average, users.userId, users.username, "True" as Liked, ifnull(rating,0) as rating, textbox FROM
+    likeList left join
+    (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
+    on likeList.imdbID = likes.imdbID left join
+    (select avg(rating) as Average,imdbID from ratingsList group by imdbID) rL
+    on rL.imdbID = likeList.imdbID left join
+    (select * from ratingsList) rates ON rates.imdbID = likeList.imdbID AND rates.email = likeList.email
+    left join users on users.email = likeList.email WHERE rating is NULL OR rating = 0
+    ) movies
+    WHERE imdbID = ?
+    `;
+    variables.push(req.params.movieid);
     https.get(url, function(reso) {
       var body = '';
       reso.on('data', function(chunk) {
@@ -646,12 +641,11 @@ app.route("/movie/:movieid")
         console.log("Got a response: ", jsonRes);
         if (jsonRes.Response === "False") {
           res.render("search", {
-             errHidden: "",
-             hiddenOUT: hiddenOUT,
-             hiddenIN: hiddenIN
-           });
-        }
-        else {
+            errHidden: "",
+            hiddenOUT: hiddenOUT,
+            hiddenIN: hiddenIN
+          });
+        } else {
           var metaLink = "";
           var metaRating = "";
           var imdbLink = "";
@@ -660,71 +654,89 @@ app.route("/movie/:movieid")
           var rtRating = "";
           var rate = '0';
           var reviews = []
-          var likes ='0';
-          for (let o = 0; o < jsonRes.Ratings.length; o++){
+          var likes = '0';
+          for (let o = 0; o < jsonRes.Ratings.length; o++) {
             var item = jsonRes.Ratings[o];
-            if (item.Source === "Internet Movie Database"){
+            if (item.Source === "Internet Movie Database") {
               imdbLink = "https://www.imdb.com/title/" + mId;
               imdbRating = item.Value;
-            }
-            else if (item.Source === "Rotten Tomatoes"){
+            } else if (item.Source === "Rotten Tomatoes") {
               rtLink = "https://www.rottentomatoes.com/m/" + jsonRes.Title.replace(/\s/g, '_').toLowerCase();
               rtRating = item.Value;
-            }
-            else if (item.Source === "Metacritic"){
+            } else if (item.Source === "Metacritic") {
               metaLink = "https://www.metacritic.com/movie/" + jsonRes.Title.replace(/\s/g, '-').toLowerCase();
               metaRating = item.Value;
             }
           }
-          connection.query(sQuery,variables,function(er,re,fiel){
-            if (er){
+          connection.query(sQuery, variables, function(er, re, fiel) {
+            if (er) {
+              console.log(er);
               res.render("search", {
-                 errHidden: "",
-                 hiddenOUT: hiddenOUT,
-                 hiddenIN: hiddenIN
-               });
-            }
-            console.log(re);
-            if (re.length == 0){
-              console.log("There are no pre-existing likes or ratings.")
-            }
-            else{
-              for (let g = 0; g < re.length; g++){
-                //change ratings
-                if (rate === '0' && re[g].Average != 0){
-                  rate = re[g].Average;
+                errHidden: "",
+                hiddenOUT: hiddenOUT,
+                hiddenIN: hiddenIN
+              });
+            } else {
+              console.log(re);
+              if (re.length == 0) {
+                console.log("There are no pre-existing likes or ratings.")
+              } else {
+                for (let g = 0; g < re.length; g++) {
+                  //change ratings
+                  if (rate === '0' && re[g].Average != 0) {
+                    rate = re[g].Average;
+                  }
+                  if (likes === '0' && re[g].Likes != 0) {
+                    likes = re[g].Likes;
+                  }
+                  //check reviews and users
+                  if (req.cookies.userData && re[g].userId === req.cookies.userData.id) {
+                    if (re[g].Liked === "True") {
+                      liked = "Unlike";
+                    } else {
+                      liked = "Like";
+                    }
+                    if (re[g].rating == 0) {
+                      rated = "Unrated";
+                    } else {
+                      rated = re[g].rating;
+                    }
+                  }
+                  if (re[g].textbox) {
+                    reviews.push(re[g]);
+                  }
                 }
-                if (likes === '0' && re[g].Likes != 0){
-                  likes = re[g].Likes;
-                }
+                // console.log(reviews);
               }
+              res.render("movie", {
+                hiddenOUT: hiddenOUT,
+                hiddenIN: hiddenIN,
+                title: jsonRes.Title,
+                poster: jsonRes.Poster,
+                year: jsonRes.Year,
+                genre: jsonRes.Genre,
+                runtime: jsonRes.Runtime,
+                release: jsonRes.Released,
+                plot: jsonRes.Plot,
+                director: jsonRes.Director,
+                esrb: jsonRes.Rated,
+                metaLink: metaLink,
+                metaRating: metaRating,
+                imdbLink: imdbLink,
+                imdbRating: imdbRating,
+                rtLink: rtLink,
+                rtRating: rtRating,
+                rate: rate,
+                likes: likes,
+                reviews: reviews,
+                liked: liked,
+                rated: rated
+              });
             }
-            res.render("movie", {
-              hiddenOUT: hiddenOUT,
-              hiddenIN: hiddenIN,
-              title: jsonRes.Title,
-              poster: jsonRes.Poster,
-              year: jsonRes.Year,
-              genre: jsonRes.Genre,
-              runtime: jsonRes.Runtime,
-              release: jsonRes.Released,
-              plot: jsonRes.Plot,
-              director: jsonRes.Director,
-              esrb: jsonRes.Rated,
-              metaLink: metaLink,
-              metaRating: metaRating,
-              imdbLink: imdbLink,
-              imdbRating: imdbRating,
-              rtLink: rtLink,
-              rtRating: rtRating,
-              rate:rate,
-              likes:likes,
-              reviews: reviews
-            });
           })
-      }
-})
+        }
       })
+    })
   })
   .post(function(req, res) { //add to liked list or assign rating
     var hiddenOUT = "";

@@ -34,7 +34,8 @@
   <div class="col-lg-4">
     <div class="card">
       <div class="card-header">
-        <a href=<%=  process.env.HTTPSURL + "/movie/" + rates[f].imdbID %>> <%= rates[f].title %> </a>
+        <a href=<%=  process.env.HTTPSURL + "/movie/" + rates[f].imdbID %>> <%= rates[f].title %> </a><br>
+        <%= rates[f].rating %>
       </div>
       <div class="card-body">
         <a href=<%=  process.env.HTTPSURL + "/movie/" + rates[f].imdbID %>> <img class="rbImg" src=<%= rates[f].poster %> onerror="this.src='/images/altImage.png'"> </a>
