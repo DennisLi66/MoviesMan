@@ -43,7 +43,10 @@ body{
   color: black;
   text-align: center;
 }
-
+.ratingsIcon{
+  height: 60px;
+  width: auto;
+}
 /* .card{
   color:black;
   height: 450px

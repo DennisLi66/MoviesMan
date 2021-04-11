@@ -73,5 +73,5 @@ on rL.imdbID = likeList.imdbID left join
 left join users on users.email = likeList.email WHERE rating is NULL OR rating = 0
 ) movies
 -- WHERE imdbID = ?
-WHERE imdbID = 'tt0120382'
+-- WHERE imdbID = 'tt0120382'
 ;
