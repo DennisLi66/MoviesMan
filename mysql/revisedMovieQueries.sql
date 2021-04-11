@@ -14,7 +14,18 @@ left join users
 ON users.email = ratingsList.email;
 
 
-
+   ( SELECT "Like" as Chosen, rLikes.imdbID as imdbID, movieName as title, poster, totalLikes, NULL as userID, NULL as username, NULL as rating, NULL as textbox, NULL as Average FROM
+    (select * from recentLikes ORDER BY recency DESC ) rLikes
+    left join
+    (SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
+    ON rLikes.imdbID = tLikes.imdbID  LIMIT 6)
+    UNION
+    (SELECT "Rate" as Chosen, recentReviews.imdbID as imdbID, mName as title, poster, NULL as totalLikes, userID, username, rating, textbox, Average FROM
+    -- select recentReviews.imdbID as imdbID, mName as title, poster, userID, username, rating, textbox, Average FROM
+    (SELECT * FROM recentReviews ORDER BY recency DESC) recentReviews
+    LEFT JOIN
+    (select imdbID,avg(rating) as Average from ratingsList group by imdbID) ratings ON
+    recentReviews.imdbID = ratings.imdbID  LIMIT 6);
 
 -- Movie Reviews associated with their amount of likes 
 select rL.imdbID as imdbID, movieName as title, ifnull(Likes,0) as Likes, Average, users.userId, users.username, if(liked.imdbID is null,"False","True") as Liked ,rating, textbox from 

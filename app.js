@@ -66,18 +66,18 @@ app.get("/recent", function(req, res) {
   }
   var sQuery =
     `
-    SELECT "Like" as Chosen, rLikes.imdbID as imdbID, movieName as title, poster, totalLikes, NULL as userID, NULL as username, NULL as rating, NULL as textbox, NULL as Average FROM
-    (select * from recentLikes ORDER BY recency DESC LIMIT 6) rLikes
-    left join
-    (SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
-    ON rLikes.imdbID = tLikes.imdbID
-    UNION
-    SELECT "Rate" as Chosen, recentReviews.imdbID as imdbID, mName as title, poster, NULL as totalLikes, userID, username, rating, textbox, Average FROM
-    -- select recentReviews.imdbID as imdbID, mName as title, poster, userID, username, rating, textbox, Average FROM
-    (SELECT * FROM recentReviews ORDER BY recency DESC LIMIT 6) recentReviews
-    LEFT JOIN
-    (select imdbID,avg(rating) as Average from ratingsList group by imdbID) ratings ON
-    recentReviews.imdbID = ratings.imdbID;
+    ( SELECT "Like" as Chosen, rLikes.imdbID as imdbID, movieName as title, poster, totalLikes, NULL as userID, NULL as username, NULL as rating, NULL as textbox, NULL as Average, max(recency) as recency FROM
+     (select * from recentLikes) rLikes
+     left join
+     (SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
+     ON rLikes.imdbID = tLikes.imdbID  GROUP BY title ORDER BY recency  DESC LIMIT 6 )
+     UNION
+     (SELECT "Rate" as Chosen, recentReviews.imdbID as imdbID, mName as title, poster, NULL as totalLikes, userID, username, rating, textbox, Average, max(recency) as recency FROM
+     -- select recentReviews.imdbID as imdbID, mName as title, poster, userID, username, rating, textbox, Average FROM
+     (SELECT * FROM recentReviews) recentReviews
+     LEFT JOIN
+     (select imdbID,avg(rating) as Average from ratingsList group by imdbID) ratings ON
+     recentReviews.imdbID = ratings.imdbID GROUP BY title ORDER BY recency DESC  LIMIT 6 );
     `;
   connection.query(sQuery, function(error, results, fields) {
     if (error) {
@@ -654,6 +654,7 @@ app.route("/movie/:movieid")
           var rtRating = "";
           var rate = '0';
           var reviews = []
+          var liked = "Like";
           var likes = '0';
           for (let o = 0; o < jsonRes.Ratings.length; o++) {
             var item = jsonRes.Ratings[o];
@@ -693,8 +694,6 @@ app.route("/movie/:movieid")
                   if (req.cookies.userData && re[g].userId === req.cookies.userData.id) {
                     if (re[g].Liked === "True") {
                       liked = "Unlike";
-                    } else {
-                      liked = "Like";
                     }
                     if (re[g].rating == 0) {
                       rated = "Unrated";
@@ -709,6 +708,7 @@ app.route("/movie/:movieid")
                 // console.log(reviews);
               }
               res.render("movie", {
+                mId: req.params.movieid,
                 hiddenOUT: hiddenOUT,
                 hiddenIN: hiddenIN,
                 title: jsonRes.Title,
@@ -751,35 +751,39 @@ app.route("/movie/:movieid")
       } else {
         hiddenIN = "hidden";
       }
-      console.log(req.params.movieid);
       if (req.body.selfRating && req.body.liked) {
         console.log("Shouldn't perform these at the same time!");
         //have a hidden input to transfer all the ejs elements back into here
         res.redirect("/movie/" + req.params.movieid);
       } else if (req.body.liked) {
         console.log("Adding to Liked List...");
-        if (req.body.liked === "like") {
-          console.log(req.body.mname)
-          var query =
-            `
-          INSERT INTO likeList (email,imdbID,movieName) VALUES (?,?,?);
-          INSERT INTO recentLikes(imdbID,poster,mName,userID,recency) VALUES (?,?,?,?,NOW());
-          `;
-          connection.query(query, [req.cookies.userData.email, req.params.movieid, req.body.mname, req.params.movieid, req.body.poster, req.body.mname, req.cookies.userData.id], function(eror, results, fields) {
-            if (eror) {
-              console.log(eror);
-            }
-            res.redirect("/movie/" + req.params.movieid); // FIX THIS: WILL NEED TO USE SQL TO SEE IF ALREADY LIKED
-          })
+        var iquery =
+          `
+        INSERT INTO likeList (email,imdbID,movieName) VALUES (?,?,?);
+        INSERT INTO recentLikes(imdbID,poster,mName,userID,recency) VALUES (?,?,?,?,NOW());
+        `;
+        var dquery =
+          `
+        DELETE FROM likeList WHERE email = ? AND imdbID = ?;
+        DELETE FROM recentLikes WHERE userID = ? AND imdbID = ?;
+        `;
+        if (req.body.liked === 'Like') {
+          connection.query(iquery,
+            [req.cookies.userData.email, req.params.movieid, req.body.mname,
+              req.params.movieid, req.body.poster, req.body.mname, req.cookies.userData.id
+            ],
+            function(er, results, fields) {
+              if (er) {
+                console.log(er);
+              }
+              res.redirect("/movie/" + req.params.movieid);
+            })
         } else {
-          var query =
-            `
-          DELETE FROM likeList WHERE email = ? AND imdbID = ?;
-          DELETE FROM recentLikes WHERE userID = ? AND imdbID = ?;
-          `;
-          connection.query(query, [req.cookies.userData.email, req.params.movieid, req.cookies.userData.id, req.params.movieid], function(eror, results, fields) {
-            if (eror) {
-              console.log(eror);
+          connection.query(dquery, [req.cookies.userData.email, req.params.movieid,
+            req.cookies.userData.id, req.params.movieid
+          ], function(er, results, fields) {
+            if (er) {
+              console.log(er);
             }
             res.redirect("/movie/" + req.params.movieid);
           })

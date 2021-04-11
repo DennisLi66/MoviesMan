@@ -32,6 +32,16 @@
     <% } %>
   </div>
   <div class="card-footer">
+    The number of times MoviesMan users have liked this movie is <%= likes %>.
+    <br>
+    <form method="POST" action=<%= "/movie/" + mId %>>
+      <input type="hidden" id="liked" name="liked" value="<%= liked %>">
+      <input type="hidden" id="mname" name="mname" value="<%= title %>">
+      <input type="hidden" id="mId" name="mId" value="<%= mId %>">
+      <input type="hidden" id="poster" name="poster" value=" <%= poster %> ">
+      <input type="submit" value="<%= liked %>" <%= hiddenOUT %>>
+    </form>
+    <br><br>
     <% if (rate === '0'){ %>
     This movie has not been rated by MoviesMan users previously.
     <% }else { %>
@@ -42,8 +52,6 @@
     <br>You have previously assigned this movie a rating of <%= rated %>.
     <% }} %>
     <br>
-    The number of times MoviesMan users have liked this movie is <%= likes %>.
-    <br><br><br>
     <div class="row">
       <% for (let d = 0; d < reviews.length; d++) {%>
       <div class="col-lg-3 col-md-6 col-sm-12">
