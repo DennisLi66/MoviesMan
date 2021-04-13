@@ -31,7 +31,7 @@
 <%} else {%>
 <div class="row" style="width:100%">
   <% for(let f = 0; f < rates.length; f++){%>
-  <div class="col-lg-4">
+  <div class="col-lg-4 col-md-6 col-sm-12">
     <div class="card">
       <div class="card-header">
         <a href=<%=  process.env.HTTPSURL + "/movie/" + rates[f].imdbID %>> <%= rates[f].title %> </a><br>
@@ -46,6 +46,7 @@
         <a href=<%=  process.env.HTTPSURL + "/profile/" + profID + "/deleter/" + rates[f].imdbID %> <%= notOwnerHidden %>> Delete Rating</a>
       </div>
     </div>
+      </div>
     <% } %>
   </div>
   <%} %>
