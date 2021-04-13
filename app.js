@@ -656,6 +656,7 @@ app.route("/movie/:movieid")
           var reviews = []
           var liked = "Like";
           var likes = '0';
+          var textbox = "";
           for (let o = 0; o < jsonRes.Ratings.length; o++) {
             var item = jsonRes.Ratings[o];
             if (item.Source === "Internet Movie Database") {
@@ -700,6 +701,9 @@ app.route("/movie/:movieid")
                     } else {
                       rated = re[g].rating;
                     }
+                    if (re[g].textbox){
+                      textbox = re[g].textbox;
+                    }
                   }
                   if (re[g].textbox) {
                     reviews.push(re[g]);
@@ -730,7 +734,8 @@ app.route("/movie/:movieid")
                 likes: likes,
                 reviews: reviews,
                 liked: liked,
-                rated: rated
+                rated: rated,
+                textbox: textbox
               });
             }
           })
@@ -790,42 +795,22 @@ app.route("/movie/:movieid")
         }
       } else if (req.body.selfRating) {
         console.log("Adding to Rating List...")
-        var query =
-          `
-      INSERT INTO ratingsList
-        (email, imdbID, movieName, rating, textbox)
-      VALUES
-        (?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        rating     = VALUES(rating),
-        textbox = VALUES(textbox);
-
-      INSERT INTO recentReviews
-        (imdbID,mName,poster,userID,username, rating ,recency,textbox)
-      VALUES
-        (?,?,?,?,?,?,NOW(),?)
-      ON DUPLICATE KEY UPDATE
-        poster = VALUES(poster),
-        rating = VALUES(rating),
-        recency = VALUES(recency),
-        textbox = VALUES(textbox);
-      `
-        var selfRating = parseInt(req.body.selfRating);
-        if (selfRating < 1 || selfRating > 10) {
-          console.log("Invalid Number is being used!");
+        var iQuery =
+        `
+        INSERT INTO ratingsList (email,imdbID,movieName,rating,textbox) VALUES (?,?,?,?,?)
+          ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox);
+        INSERT INTO recentReviews (imdbID,mname,poster,userID,username,rating,textbox,recency) VALUES (?,?,?,?,?,?,?,NOW())
+          ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox), recency = VALUES(recency);
+        `;
+        connection.query(iQuery,[
+          req.cookies.userData.email,req.params.movieid,req.body.mname,req.body.choice,req.body.tReview,
+          req.params.movieid,req.body.mname,req.body.poster,req.cookies.userData.id, req.cookies.userData.name, req.body.choice,req.body.textbox
+        ],function(errors,result,fi){
+          if (errors){
+            console.log(errors);
+          }
           res.redirect("/movie/" + req.params.movieid);
-        } else {
-          connection.query(query,
-            [req.cookies.userData.email, req.params.movieid, req.body.mname, selfRating, req.body.mReview,
-              req.params.movieid, req.body.mname, req.body.poster, req.cookies.userData.id, req.cookies.userData.name, selfRating, req.body.mReview
-            ],
-            function(error, results, fields) {
-              if (error) {
-                console.log(error);
-              }
-              res.redirect("/movie/" + req.params.movieid);
-            })
-        }
+        })
       } else {
         console.log("Nothing Happened?")
         res.redirect("/movie/" + req.params.movieid);

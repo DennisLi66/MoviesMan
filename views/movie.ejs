@@ -51,6 +51,30 @@
     <% } else if (rated !== ""){ %>
     <br>You have previously assigned this movie a rating of <%= rated %>.
     <% }} %>
+
+    <form method="POST" action=<%= "/movie/" + mId %> <%= hiddenOUT %>>
+      <input type="hidden" id="selfRating" name="selfRating" value="selfRating">
+      <!-- Select Form -->
+      Rate this movie:
+      <select name="choice" id="choice">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select> out of 10!<br>
+      <!-- TextBox -->
+      <textarea id="tReview" name="tReview" placeholder="Enter Review..." rows="4" cols="50"><%= textbox %></textarea><br>
+      <input type="hidden" id="mname" name="mname" value="<%= title %>">
+      <input type="hidden" id="poster" name="poster" value=" <%= poster %> ">
+      <input type="submit" value="Rate">
+    </form>
+
     <br>
     <div class="row">
       <% for (let d = 0; d < reviews.length; d++) {%>
