@@ -26,7 +26,7 @@ var connection = mysql.createConnection({
   multipleStatements: true
 })
 connection.connect(); //FIX THIS MOVE CONNECTIONS TO INSIDE SQL CALLS
-//FIX THIS: KILL TEMPOARY COOKIES
+
 //Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
 app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
   if (req.cookies.userData) {
@@ -41,7 +41,7 @@ app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
     } else {
       console.log(req.cookies.userData.name + " is currently logged in.");
       res.render("home", {
-                banner: "MoviesMan: Homepage",
+        banner: "MoviesMan: Homepage",
         hiddenIN: 'hidden',
         hiddenOUT: ''
       });
@@ -49,7 +49,7 @@ app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
   } else {
     console.log("Anon User");
     res.render("home", {
-              banner: "MoviesMan: Homepage",
+      banner: "MoviesMan: Homepage",
       hiddenOUT: 'hidden',
       hiddenIN: ''
     });
@@ -119,11 +119,11 @@ app.get("/about", function(req, res) { //FIX THIS TO ACTUALLY DESCRIBE THE SITE
       hiddenIN = "hidden";
     }
   }
-    res.render("about", {
-      banner: "MoviesMan: About Page",
-      hiddenOUT: hiddenOUT,
-      hiddenIN: hiddenIN
-    });
+  res.render("about", {
+    banner: "MoviesMan: About Page",
+    hiddenOUT: hiddenOUT,
+    hiddenIN: hiddenIN
+  });
 
 });
 // Registration and Login
@@ -146,7 +146,7 @@ app.route("/register")
       }
     } else {
       res.render("register", {
-                  banner: "MoviesMan: Registration",
+        banner: "MoviesMan: Registration",
         errorMsg: '',
         hiddenOUT: 'hidden',
         hiddenIN: '',
@@ -161,7 +161,7 @@ app.route("/register")
     var username = req.body.username;
     if (cPassword !== password) { //confirmation did not match
       res.render("register", {
-                  banner: "MoviesMan: Registration",
+        banner: "MoviesMan: Registration",
         errorMsg: "The passwords did not match.",
         hiddenOUT: 'hidden',
         hiddenIN: '',
@@ -173,7 +173,7 @@ app.route("/register")
         if (err) {
           console.log(err);
           res.render("register", {
-                      banner: "MoviesMan: Registration",
+            banner: "MoviesMan: Registration",
             errorMsg: err,
             hiddenOUT: 'hidden',
             hiddenIN: '',
@@ -182,7 +182,7 @@ app.route("/register")
         } else {
           if (results.length > 0) {
             res.render("register", {
-                        banner: "MoviesMan: Registration",
+              banner: "MoviesMan: Registration",
               errorMsg: "An account using that email already exists.",
               hiddenOUT: 'hidden',
               hiddenIN: '',
@@ -195,18 +195,18 @@ app.route("/register")
               if (e2rr) {
                 console.log(e2rr);
                 res.render("register", {
-                            banner: "MoviesMan: Registration",
+                  banner: "MoviesMan: Registration",
                   errorMsg: e2rr,
                   hiddenOUT: 'hidden',
                   hiddenIN: '',
                   errHidden: ''
                 });
               } else {
-                connection.query(insertStatement, [username, email, hash], function(er1r, results, fields) { ///////FIX THIS ADD SALTING
+                connection.query(insertStatement, [username, email, hash], function(er1r, results, fields) {
                   if (er1r) {
                     console.log(er1r);
                     res.render("register", {
-                                banner: "MoviesMan: Registration",
+                      banner: "MoviesMan: Registration",
                       errorMsg: er1r,
                       hiddenOUT: 'hidden',
                       hiddenIN: '',
@@ -214,7 +214,7 @@ app.route("/register")
                     });
                   } else {
                     res.render("login", {
-                                banner: "MoviesMan: Login",
+                      banner: "MoviesMan: Login",
                       errorMsg: '',
                       hiddenOUT: 'hidden',
                       hiddenIN: '',
@@ -238,7 +238,7 @@ app.route("/login")
       res.redirect("/");
     } else {
       res.render("login", {
-                                        banner: "MoviesMan: Login",
+        banner: "MoviesMan: Login",
         errorMsg: '',
         hiddenOUT: 'hidden',
         hiddenIN: '',
@@ -256,7 +256,7 @@ app.route("/login")
       if (eror) {
         console.log(eror);
         res.render("login", {
-                                          banner: "MoviesMan: Login",
+          banner: "MoviesMan: Login",
           errorMsg: eror,
           hiddenOUT: 'hidden',
           hiddenIN: '',
@@ -267,7 +267,7 @@ app.route("/login")
       } else {
         if (results.length == 0) {
           res.render("login", {
-                                            banner: "MoviesMan: Login",
+            banner: "MoviesMan: Login",
             errorMsg: 'That email and password combination do not exist.',
             hiddenOUT: 'hidden',
             hiddenIN: '',
@@ -281,7 +281,7 @@ app.route("/login")
             if (err3) {
               console.log(err3);
               res.render("login", {
-                                                banner: "MoviesMan: Login",
+                banner: "MoviesMan: Login",
                 errorMsg: err3,
                 hiddenOUT: 'hidden',
                 hiddenIN: '',
@@ -305,7 +305,7 @@ app.route("/login")
             } else {
               console.log("Logging in failed.")
               res.render("login", {
-                                                banner: "MoviesMan: Login",
+                banner: "MoviesMan: Login",
                 errorMsg: 'That email and password combination do not exist."',
                 hiddenOUT: 'hidden',
                 hiddenIN: '',
@@ -327,7 +327,7 @@ app.route("/forgot")
         res.clearCookie('userData');
         console.log(username + " has been logged out.");
         res.render("forgot", {
-                                          banner: "MoviesMan: Forgot Your Password?",
+          banner: "MoviesMan: Forgot Your Password?",
           hiddenOUT: 'hidden',
           hiddenIN: '',
           confHidden: 'hidden',
@@ -342,7 +342,7 @@ app.route("/forgot")
       }
     } else {
       res.render("forgot", {
-                                                  banner: "MoviesMan: Forgot Your Password?",
+        banner: "MoviesMan: Forgot Your Password?",
         hiddenOUT: 'hidden',
         hiddenIN: '',
         confHidden: 'hidden',
@@ -359,7 +359,7 @@ app.route("/forgot")
       if (eror) {
         console.log(eror);
         res.render("forgot", {
-                                                    banner: "MoviesMan: Forgot Your Password?",
+          banner: "MoviesMan: Forgot Your Password?",
           hiddenOUT: 'hidden',
           hiddenIN: '',
           confHidden: 'hidden',
@@ -387,7 +387,7 @@ app.route("/forgot")
           if (error) {
             console.log(error);
             res.render("forgot", {
-                                                        banner: "MoviesMan: Forgot Your Password?",
+              banner: "MoviesMan: Forgot Your Password?",
               hiddenOUT: 'hidden',
               hiddenIN: '',
               confHidden: 'hidden',
@@ -411,7 +411,7 @@ app.route("/forgot")
               if (rre) {
                 console.log(rre);
                 res.render("forgot", {
-                                                            banner: "MoviesMan: Forgot Your Password?",
+                  banner: "MoviesMan: Forgot Your Password?",
                   hiddenOUT: 'hidden',
                   hiddenIN: '',
                   confHidden: 'hidden',
@@ -423,7 +423,7 @@ app.route("/forgot")
               } else {
                 console.log("Insertion Done.")
                 res.render("forgot", {
-                                                            banner: "MoviesMan: Forgot Your Password?",
+                  banner: "MoviesMan: Forgot Your Password?",
                   hiddenOUT: 'hidden',
                   hiddenIN: '',
                   confHidden: '',
@@ -438,7 +438,7 @@ app.route("/forgot")
         });
       } else {
         res.render("forgot", {
-                                                    banner: "MoviesMan: Forgot Your Password?",
+          banner: "MoviesMan: Forgot Your Password?",
           hiddenOUT: 'hidden',
           hiddenIN: '',
           confHidden: 'hidden',
@@ -462,7 +462,7 @@ app.get("/forgot/:linkID", function(req, res) {
       if (errr) {
         console.log(errr);
         res.render("forgot", {
-                                                    banner: "MoviesMan: Forgot Your Password?",
+          banner: "MoviesMan: Forgot Your Password?",
           hiddenOUT: 'hidden',
           hiddenIN: '',
           confHidden: 'hidden',
@@ -472,7 +472,7 @@ app.get("/forgot/:linkID", function(req, res) {
         })
       } else if (resu.length == 0) {
         res.render("forgot", {
-                                                    banner: "MoviesMan: Forgot Your Password?",
+          banner: "MoviesMan: Forgot Your Password?",
           hiddenOUT: 'hidden',
           hiddenIN: '',
           confHidden: 'hidden',
@@ -508,7 +508,7 @@ app.get("/forgot/:linkID", function(req, res) {
               expires: new Date(5000 + Date.now())
             });
             res.render('changePassword', {
-                                                        banner: "MoviesMan: Change Your Password",
+              banner: "MoviesMan: Change Your Password",
               hiddenError: 'hidden',
               hiddenConfirm: 'hidden',
               errorMsg: '',
@@ -526,7 +526,7 @@ app.get("/logout", function(req, res) {
     res.clearCookie('userData');
     console.log(username + " has been logged out.");
     res.render("logout", {
-                                                banner: "MoviesMan: Logged Out",
+      banner: "MoviesMan: Logged Out",
       toRemovUser: username,
       hiddenOUT: "hidden",
       hiddenIN: ""
@@ -553,7 +553,7 @@ app.get("/search", function(req, res) { //search and search results
   }
   if (req.query.length == 0) { //basic search page
     res.render("search", {
-                                                banner: "MoviesMan: Search Page",
+      banner: "MoviesMan: Search Page",
       errHidden: "hidden",
       hiddenOUT: hiddenOUT,
       hiddenIN: hiddenIN
@@ -580,7 +580,7 @@ app.get("/search", function(req, res) { //search and search results
               console.log("Found Multiple...")
               console.log(serched);
               res.render("searchResults", {
-                                                          banner: "MoviesMan: Search Results",
+                banner: "MoviesMan: Search Results",
                 sResults: serched,
                 errHidden: "hidden",
                 hiddenOUT: hiddenOUT,
@@ -590,7 +590,7 @@ app.get("/search", function(req, res) { //search and search results
           } else {
             console.log("Found Nothing...")
             res.render("search", {
-                                                        banner: "MoviesMan: Search Page",
+              banner: "MoviesMan: Search Page",
               errHidden: "",
               hiddenOUT: hiddenOUT,
               hiddenIN: hiddenIN
@@ -600,7 +600,7 @@ app.get("/search", function(req, res) { //search and search results
     } else {
       console.log("Found Nothing...")
       res.render("search", {
-                                                  banner: "MoviesMan: Search Page",
+        banner: "MoviesMan: Search Page",
         errHidden: "hidden",
         hiddenOUT: hiddenOUT,
         hiddenIN: hiddenIN
@@ -667,7 +667,7 @@ app.route("/movie/:movieid")
         console.log("Got a response: ", jsonRes);
         if (jsonRes.Response === "False") {
           res.render("search", {
-                                                              banner: "MoviesMan: Search Page",
+            banner: "MoviesMan: Search Page",
             errHidden: "",
             hiddenOUT: hiddenOUT,
             hiddenIN: hiddenIN
@@ -701,7 +701,7 @@ app.route("/movie/:movieid")
             if (er) {
               console.log(er);
               res.render("search", {
-                                                                  banner: "MoviesMan: Search Page",
+                banner: "MoviesMan: Search Page",
                 errHidden: "",
                 hiddenOUT: hiddenOUT,
                 hiddenIN: hiddenIN
@@ -729,7 +729,7 @@ app.route("/movie/:movieid")
                     } else {
                       rated = re[g].rating;
                     }
-                    if (re[g].textbox){
+                    if (re[g].textbox) {
                       textbox = re[g].textbox;
                     }
                   }
@@ -740,7 +740,7 @@ app.route("/movie/:movieid")
                 // console.log(reviews);
               }
               res.render("movie", {
-                                                                  banner: "MoviesMan: " + jsonRes.Title,
+                banner: "MoviesMan: " + jsonRes.Title,
                 mId: req.params.movieid,
                 hiddenOUT: hiddenOUT,
                 hiddenIN: hiddenIN,
@@ -825,17 +825,17 @@ app.route("/movie/:movieid")
       } else if (req.body.selfRating) {
         console.log("Adding to Rating List...")
         var iQuery =
-        `
+          `
         INSERT INTO ratingsList (email,imdbID,movieName,rating,textbox) VALUES (?,?,?,?,?)
           ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox);
         INSERT INTO recentReviews (imdbID,mname,poster,userID,username,rating,textbox,recency) VALUES (?,?,?,?,?,?,?,NOW())
           ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox), recency = VALUES(recency);
         `;
-        connection.query(iQuery,[
-          req.cookies.userData.email,req.params.movieid,req.body.mname,req.body.choice,req.body.tReview,
-          req.params.movieid,req.body.mname,req.body.poster,req.cookies.userData.id, req.cookies.userData.name, req.body.choice,req.body.textbox
-        ],function(errors,result,fi){
-          if (errors){
+        connection.query(iQuery, [
+          req.cookies.userData.email, req.params.movieid, req.body.mname, req.body.choice, req.body.tReview,
+          req.params.movieid, req.body.mname, req.body.poster, req.cookies.userData.id, req.cookies.userData.name, req.body.choice, req.body.textbox
+        ], function(errors, result, fi) {
+          if (errors) {
             console.log(errors);
           }
           res.redirect("/movie/" + req.params.movieid);
@@ -905,7 +905,7 @@ ON lists.email = info.email ORDER BY recency
       if (erro) {
         console.log(erro);
         res.render('profile', {
-                                                            banner: "MoviesMan: " + profUser,
+          banner: "MoviesMan: " + profUser,
           hiddenIN: hiddenIN,
           hiddenOUT: hiddenOUT,
           profuser: profUser,
@@ -914,7 +914,7 @@ ON lists.email = info.email ORDER BY recency
           noRates: noRates,
           notOwnerHidden: notOwnerHidden,
           profID: profID
-        }); //FIX THIS
+        });
       } else {
         if (results.length == 0) { // No Such user Exists
           console.log("No such user exists with that id.");
@@ -929,7 +929,7 @@ ON lists.email = info.email ORDER BY recency
             }
           }
           res.render('profile', {
-                                                              banner: "MoviesMan: " + profUser,
+            banner: "MoviesMan: " + profUser,
             hiddenIN: hiddenIN,
             hiddenOUT: hiddenOUT,
             profuser: profUser,
@@ -1011,7 +1011,7 @@ app.route("/changePassword")
       console.log(req.cookies.userData.name + " is currently logged in.");
       // fetch Email
       res.render("changePassword", {
-                                                          banner: "MoviesMan: Change Password",
+        banner: "MoviesMan: Change Password",
         hiddenError: 'hidden',
         hiddenConfirm: 'hidden',
         errorMsg: '',
@@ -1030,7 +1030,7 @@ app.route("/changePassword")
       var sQuery = "UPDATE users SET pswrd = ? WHERE email = ?";
       if (pass !== cPass) {
         res.render("changePassword", {
-                                                            banner: "MoviesMan: Change Password",
+          banner: "MoviesMan: Change Password",
           hiddenError: '',
           hiddenConfirm: 'hidden',
           errorMsg: 'Your passwords did not match.',
@@ -1040,7 +1040,7 @@ app.route("/changePassword")
         bcrypt.hash(pass, 10, function(e2rr, hash) {
           if (e2rr) {
             res.render("changePassword", {
-                                                                banner: "MoviesMan: Change Password",
+              banner: "MoviesMan: Change Password",
               hiddenError: '',
               hiddenConfirm: 'hidden',
               errorMsg: e2rr,
@@ -1050,7 +1050,7 @@ app.route("/changePassword")
             connection.query(sQuery, [hash, email], function(err, results) {
               if (err) {
                 res.render("changePassword", {
-                                                                    banner: "MoviesMan: Change Password",
+                  banner: "MoviesMan: Change Password",
                   hiddenError: '',
                   hiddenConfirm: 'hidden',
                   errorMsg: '',
@@ -1073,7 +1073,7 @@ app.route("/changePassword")
                 transporter.sendMail(mailOptions, function(error, info) {
                   if (error) {
                     res.render("changePassword", {
-                                                                        banner: "MoviesMan: Change Password",
+                      banner: "MoviesMan: Change Password",
                       hiddenError: '',
                       hiddenConfirm: 'hidden',
                       errorMsg: error,
