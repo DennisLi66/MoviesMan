@@ -3,7 +3,7 @@ const express = require("express");
 const https = require("https");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const cookieParser = require('cookie-parser'); //FIX THIS: UPDATE COOKIES ON VISITING SITES
+const cookieParser = require('cookie-parser');
 const mysql = require('mysql'); //FIX THIS: Maybe only open connections in functions, then close them immediately
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
@@ -27,33 +27,29 @@ var connection = mysql.createConnection({
 })
 connection.connect(); //FIX THIS MOVE CONNECTIONS TO INSIDE SQL CALLS
 
-//Home //FIX THIS IF AUTHENTICATED REFRESH SESSION
+//Home
 app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
+  var hiddenOUT = "hidden";
+  var hiddenIN = "";
   if (req.cookies.userData) {
     if (req.cookies.userData.temporary) {
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
-      res.render("home", {
-        banner: "MoviesMan: Homepage",
-        hiddenOUT: 'hidden',
-        hiddenIN: ''
-      });
     } else {
-      console.log(req.cookies.userData.name + " is currently logged in.");
-      res.render("home", {
-        banner: "MoviesMan: Homepage",
-        hiddenIN: 'hidden',
-        hiddenOUT: ''
-      });
+      res.cookie("userData", req.cookies.userData, {
+        expires: new Date(900000 + Date.now())
+      })
+      console.log(req.cookies.userData.name + " has been reauthenticated");
+      //REAUTHEN
+      hiddenIN = "hidden";
+      hiddenOUT = "";
     }
-  } else {
-    console.log("Anon User");
-    res.render("home", {
-      banner: "MoviesMan: Homepage",
-      hiddenOUT: 'hidden',
-      hiddenIN: ''
-    });
   }
+  res.render("home", {
+    banner: "MoviesMan: Homepage",
+    hiddenOUT: hiddenOUT,
+    hiddenIN: hiddenIN
+  })
 });
 app.get("/recent", function(req, res) {
   var hiddenOUT = "hidden";
@@ -63,6 +59,10 @@ app.get("/recent", function(req, res) {
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
     } else {
+      res.cookie("userData", req.cookies.userData, {
+        expires: new Date(900000 + Date.now())
+      })
+      console.log(req.cookies.userData.name + " has been reauthenticated");
       hiddenIN = "hidden";
       hiddenOUT = "";
     }
@@ -114,7 +114,10 @@ app.get("/about", function(req, res) { //FIX THIS TO ACTUALLY DESCRIBE THE SITE
       res.clearCookie('userData');
       console.log(username + " has been logged out.");
     } else {
-      console.log(req.cookies.userData.name + " is currently logged in.");
+      res.cookie("userData", req.cookies.userData, {
+        expires: new Date(900000 + Date.now())
+      })
+      console.log(req.cookies.userData.name + " has been reauthenticated");
       hiddenOUT = "";
       hiddenIN = "hidden";
     }
@@ -156,7 +159,7 @@ app.route("/register")
   })
   .post(function(req, res) {
     var email = req.body.email;
-    var password = req.body.password; //FIX THIS: Add checking against a regex to keep password complicated
+    var password = req.body.password;
     var cPassword = req.body.cPassword;
     var username = req.body.username;
     if (cPassword !== password) { //confirmation did not match
@@ -299,8 +302,8 @@ app.route("/login")
                 temporary: false
               }
               res.cookie("userData", cookieObj, {
-                expires: new Date(500000 + Date.now())
-              }); //FIX THIS INTO LONGER TIME BASED COOKIE
+                expires: new Date(900000 + Date.now())
+              });
               res.redirect("/");
             } else {
               console.log("Logging in failed.")
@@ -546,6 +549,10 @@ app.get("/search", function(req, res) { //search and search results
       console.log(username + " has been logged out.");
       hiddenOUT = "hidden";
     } else {
+      res.cookie("userData", req.cookies.userData, {
+        expires: new Date(900000 + Date.now())
+      })
+      console.log(req.cookies.userData.name + " has been reauthenticated");
       hiddenIN = "hidden";
     }
   } else {
@@ -628,6 +635,10 @@ app.route("/movie/:movieid")
         res.clearCookie('userData');
         console.log(username + " has been logged out.");
       } else {
+        res.cookie("userData", req.cookies.userData, {
+          expires: new Date(900000 + Date.now())
+        })
+        console.log(req.cookies.userData.name + " has been reauthenticated");
         hiddenIN = "hidden";
         hiddenOUT = "";
         variables = [];
@@ -881,6 +892,10 @@ app.route("/profile/:userID")
         res.clearCookie('userData');
         console.log(username + " has been logged out.");
       } else {
+        res.cookie("userData", req.cookies.userData, {
+          expires: new Date(900000 + Date.now())
+        })
+        console.log(req.cookies.userData.name + " has been reauthenticated");
         hiddenIN = "hidden";
         hiddenOUT = "";
         if (profID == req.cookies.userData.id) {
@@ -942,7 +957,6 @@ ON lists.email = info.email ORDER BY recency
       }
     })
   })
-
 app.get("/profile/:userID/delete/:mID", function(req, res) {
   var mID = req.params.mID;
   var userID = req.params.userID;
@@ -1004,7 +1018,7 @@ app.get("/profile/:userID/deleter/:mID", function(req, res) {
     res.redirect("/login")
   }
 })
-
+// Changing Password
 app.route("/changePassword")
   .get(function(req, res) {
     if (req.cookies.userData) {
@@ -1092,18 +1106,6 @@ app.route("/changePassword")
       res.redirect("/");
     }
   })
-app.get("/test", function(req, res) {
-  var query = "INSERT INTO recentLikes (imdbID,poster,recency) VALUES (?,?,NOW());";
-  // connection.query(query,["A","B"],function(err,results,fields){
-  //   if (err){
-  //     console.log(err);
-  //   }
-  //   else{
-  //
-  //   }
-  // })
-  res.redirect("/")
-})
 app.listen(3000, function() {
   console.log("Server Started.")
 });
