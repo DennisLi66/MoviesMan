@@ -101,7 +101,7 @@ app.get("/recent", function(req, res) {
       })
     }
   })
-}) 
+})
 app.get("/about", function(req, res) { //FIX THIS TO ACTUALLY DESCRIBE THE SITE
   var hiddenOUT = "hidden";
   var hiddenIN = "";
@@ -871,7 +871,7 @@ app.get("/profile", function(req, res) { //go to user's specfic profile, or redi
     console.log("User isn't even logged in! Redirecting...");
     res.redirect("/");
   }
-}) //REWORK
+})
 app.route("/profile/:userID") //REWORK
   .get(function(req, res) {
     var profID = req.params.userID;
@@ -966,10 +966,10 @@ app.get("/profile/:userID/delete/:mID", function(req, res) {
     } else {
       if (userID == req.cookies.userData.id) { //correct entrance
         var dQuery =
-          `DELETE FROM likeList WHERE email = ? AND imdbID = ?;
-         DELETE FROM recentLikes WHERE userID = ? AND imdbID = ?;
+          `
+         DELETE FROM likes WHERE userID = ? AND imdbID = ?;
          `;
-        connection.query(dQuery, [req.cookies.userData.email, mID, req.cookies.userData.id, mID], function(error, results, fields) {
+        connection.query(dQuery, [req.cookies.userData.id, mID], function(error, results, fields) {
           if (error) {
             console.log(error);
           }
@@ -982,7 +982,7 @@ app.get("/profile/:userID/delete/:mID", function(req, res) {
   } else { //user not logged in
     res.redirect("/login")
   }
-}) //REWORK
+})
 app.get("/profile/:userID/deleter/:mID", function(req, res) {
   var mID = req.params.mID;
   var userID = req.params.userID;
@@ -997,10 +997,9 @@ app.get("/profile/:userID/deleter/:mID", function(req, res) {
       if (userID == req.cookies.userData.id) {
         var dQuery =
           `
-        DELETE FROM ratingsList WHERE email = ? AND imdbID = ?;
-        DELETE FROM recentReviews WHERE userID = ? AND imdbID = ?;
+        DELETE from ratings WHERE userID = ? AND imdbID = ?,
         `;
-        connection.query(dQuery, [req.cookies.userData.email, mID, req.cookies.userData.id, mID], function(error, results, fields) {
+        connection.query(dQuery, [ req.cookies.userData.id, mID], function(error, results, fields) {
           if (error) {
             console.log(error);
           }
@@ -1013,7 +1012,7 @@ app.get("/profile/:userID/deleter/:mID", function(req, res) {
   } else {
     res.redirect("/login")
   }
-}) //REWORK
+}) 
 // Changing Password
 app.route("/changePassword")
   .get(function(req, res) {
