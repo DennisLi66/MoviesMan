@@ -50,7 +50,7 @@ app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
     hiddenOUT: hiddenOUT,
     hiddenIN: hiddenIN
   })
-});
+}); //REWORK
 app.get("/recent", function(req, res) {
   var hiddenOUT = "hidden";
   var hiddenIN = "";
@@ -69,21 +69,17 @@ app.get("/recent", function(req, res) {
   }
   var sQuery =
     `
-    ( SELECT "Like" as Chosen, rLikes.imdbID as imdbID, movieName as title, poster, totalLikes, NULL as userID, NULL as username, NULL as rating, NULL as textbox, NULL as Average, max(recency) as recency FROM
-     (select * from recentLikes) rLikes
-     left join
-     (SELECT email,imdbID,movieName, count(*) as totalLikes FROM likelist GROUP BY imdbID) tLikes
-     ON rLikes.imdbID = tLikes.imdbID  GROUP BY title ORDER BY recency  DESC LIMIT 6 )
-     UNION
-     (SELECT "Rate" as Chosen, recentReviews.imdbID as imdbID, mName as title, poster, NULL as totalLikes, userID, username, rating, textbox, Average, max(recency) as recency FROM
-     -- select recentReviews.imdbID as imdbID, mName as title, poster, userID, username, rating, textbox, Average FROM
-     (SELECT * FROM recentReviews) recentReviews
-     LEFT JOIN
-     (select imdbID,avg(rating) as Average from ratingsList group by imdbID) ratings ON
-     recentReviews.imdbID = ratings.imdbID GROUP BY title ORDER BY recency DESC  LIMIT 6 );
+    (select "Like" as Chosen , likes.imdbID, title, poster, count(*) as totalLikes, NULL as username, NULL as rating, NULL as textbox, NULL as Average, max(recency) as recency
+    from likes group by imdbID LIMIT 6)
+    union all
+    (select "Rate" as Chosen, ratings.imdbID, title, poster, NULL as totalLikes, username, rating, textbox, Average ,recency
+    from ratings
+    left join (select imdbID, avg(rating) as Average from ratings group by imdbID) aRating
+    ON ratings.imdbID = aRating.imdbID LIMIT 6) order by recency
     `;
   connection.query(sQuery, function(error, results, fields) {
     if (error) {
+      console.log(error);
       res.redirect("/");
     } else {
       console.log(results);
@@ -105,7 +101,7 @@ app.get("/recent", function(req, res) {
       })
     }
   })
-})
+}) 
 app.get("/about", function(req, res) { //FIX THIS TO ACTUALLY DESCRIBE THE SITE
   var hiddenOUT = "hidden";
   var hiddenIN = "";
@@ -567,7 +563,7 @@ app.get("/search", function(req, res) { //search and search results
     })
   } else {
     if (req.query.title) {
-      console.log(req.query.title);
+      // console.log(req.query.title);
       var ttle = req.query.title;
       var worked = true;
       imdb.search({
@@ -619,7 +615,7 @@ app.get("/search", function(req, res) { //search and search results
 app.get("/movie", function(req, res) { //redirect?
   res.redirect("/search");
 })
-app.route("/movie/:movieid")
+app.route("/movie/:movieid") //REWORK
   .get(function(req, res) {
     // Objective: Display Movie Details, Number of Likes, Number of Rates
     var hiddenOUT = "hidden";
@@ -875,8 +871,8 @@ app.get("/profile", function(req, res) { //go to user's specfic profile, or redi
     console.log("User isn't even logged in! Redirecting...");
     res.redirect("/");
   }
-})
-app.route("/profile/:userID")
+}) //REWORK
+app.route("/profile/:userID") //REWORK
   .get(function(req, res) {
     var profID = req.params.userID;
     var userEmail = req.params.email;
@@ -986,7 +982,7 @@ app.get("/profile/:userID/delete/:mID", function(req, res) {
   } else { //user not logged in
     res.redirect("/login")
   }
-})
+}) //REWORK
 app.get("/profile/:userID/deleter/:mID", function(req, res) {
   var mID = req.params.mID;
   var userID = req.params.userID;
@@ -1017,7 +1013,7 @@ app.get("/profile/:userID/deleter/:mID", function(req, res) {
   } else {
     res.redirect("/login")
   }
-})
+}) //REWORK
 // Changing Password
 app.route("/changePassword")
   .get(function(req, res) {
