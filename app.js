@@ -872,10 +872,9 @@ app.get("/profile", function(req, res) { //go to user's specfic profile, or redi
     res.redirect("/");
   }
 })
-app.route("/profile/:userID") //REWORK
+app.route("/profile/:userID") 
   .get(function(req, res) {
     var profID = req.params.userID;
-    var userEmail = req.params.email;
     var profUser = "";
     var hiddenOUT = "hidden";
     var hiddenIN = "";
@@ -901,16 +900,16 @@ app.route("/profile/:userID") //REWORK
     }
     var sQuery =
       `
-      SELECT * FROM
-(select userID,username, email from users where userID = ?) info
-LEFT JOIN
-(select "Liked" as Chosen, users.email as email, poster, likeList.imdbID, movieName as title, NULL as rating, NULL as textbox, recency
-from likelist left join users on users.email = likeList.email left join recentLikes on likeList.imdbID = recentLikes.imdbID AND recentLikes.userID = users.userID
-UNION
-select "Rated" as Chosen, users.email as email, poster, ratingsList.imdbID, movieName as title, ratingsList.rating, ratingsList.textbox, recency
-from ratingsList left join users on users.email = ratingsList.email left join recentReviews on recentReviews.imdbID = ratingsList.imdbID AND recentReviews.userID = users.userID
-) lists
-ON lists.email = info.email ORDER BY recency
+      select users.userID as userID, username, Chosen, poster, imdbID, title, rating, textbox, recency from users
+      left join
+      (
+      select userID, 'Liked' as Chosen, poster, imdbID, title, NULL as rating, NULL as textbox, recency from likes
+      UNION ALL
+      select userID, 'Rated' as Chosen, poster, imdbID, title, rating, textbox, recency from ratings
+      ) movies
+      on movies.userID = users.userID
+      WHERE users.userid = ?
+      ORDER BY recency DESC
     `;
     connection.query(sQuery, [profID], function(erro, results, fields) {
       if (erro) {
@@ -920,9 +919,8 @@ ON lists.email = info.email ORDER BY recency
           hiddenIN: hiddenIN,
           hiddenOUT: hiddenOUT,
           profuser: profUser,
-          likedRated: likedRated,
-          noLikes: noLikes,
-          noRates: noRates,
+          likes: likes,
+          rates: rates,
           notOwnerHidden: notOwnerHidden,
           profID: profID
         });
@@ -1012,7 +1010,7 @@ app.get("/profile/:userID/deleter/:mID", function(req, res) {
   } else {
     res.redirect("/login")
   }
-}) 
+})
 // Changing Password
 app.route("/changePassword")
   .get(function(req, res) {
