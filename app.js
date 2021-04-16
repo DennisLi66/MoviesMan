@@ -615,7 +615,7 @@ app.get("/search", function(req, res) { //search and search results
 app.get("/movie", function(req, res) { //redirect?
   res.redirect("/search");
 })
-app.route("/movie/:movieid") //REWORK
+app.route("/movie/:movieid") //REWORK GET
   .get(function(req, res) {
     // Objective: Display Movie Details, Number of Likes, Number of Rates
     var hiddenOUT = "hidden";
@@ -642,26 +642,19 @@ app.route("/movie/:movieid") //REWORK
     }
     sQuery =
       `
-    SELECT * FROM
-    (select rL.imdbID as imdbID, movieName as title, ifnull(Likes,0) as Likes, Average, users.userId, users.username, if(liked.imdbID is null,"False","True") as Liked ,rating, textbox from
-    ratingsList left join  (select imdbID, avg(rating) as Average from ratingsList GROUP BY imdbID) rL
-    ON rL.imdbID = ratingsList.imdbID
-    left join users ON users.email = ratingsList.email
-    left join (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
-    ON likes.imdbID = ratingsList.imdbID left join
-    (select imdbID, email from likelist GROUP BY imdbID) liked
-    on liked.email = ratingsList.email AND liked.imdbID = ratingsList.imdbID
-    UNION ALL
-     SELECT likeList.imdbID, likeList.movieName as title, Likes, ifnull(Average,0) as Average, users.userId, users.username, "True" as Liked, ifnull(rating,0) as rating, textbox FROM
-    likeList left join
-    (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
-    on likeList.imdbID = likes.imdbID left join
-    (select avg(rating) as Average,imdbID from ratingsList group by imdbID) rL
-    on rL.imdbID = likeList.imdbID left join
-    (select * from ratingsList) rates ON rates.imdbID = likeList.imdbID AND rates.email = likeList.email
-    left join users on users.email = likeList.email WHERE rating is NULL OR rating = 0
-    ) movies
-    WHERE imdbID = ?
+      select * from (
+      select likes.imdbID as imdbID, likes.title as  title, Likes, Average, likes.userID as userId, users.username, 'True' as Liked, ifnull(rating,0) as rating, textbox from likes
+      left join users on users.userID = likes.userID
+      left join ratings on users.userID = ratings.userID and likes.imdbID = ratings.imdbID AND likes.userID = ratings.userID
+      left join (select imdbID, count(*) as Likes from likes group by imdbID) tLikes ON tLikes.imdbID = likes.imdbID
+      left join (select imdbID, avg(rating) as Average from ratings group by imdbID) aRatings ON aRatings.imdbID = likes.imdbID
+      UNION ALL
+      select ratings.imdbID as imdbID, ratings.title as title, ifnull(Likes,0) as Likes, Average, ratings.userID as userId, ratings.username, if(likes.imdbID is NULL,'False','True') as Liked, rating, textbox from ratings
+      left join likes on likes.userID = ratings.userID AND likes.imdbID = ratings.imdbID
+      left join (select imdbID, count(*) as Likes from likes group by imdbID) tLikes ON tLikes.imdbID = ratings.imdbID
+      left join (select imdbID, avg(rating) as Average from ratings group by imdbID) aRatings ON aRatings.imdbID = ratings.imdbID
+      WHERE likes.imdbID is null
+    ) movies where imdbID = ?;
     `;
     variables.push(req.params.movieid);
     https.get(url, function(reso) {
@@ -800,19 +793,15 @@ app.route("/movie/:movieid") //REWORK
         console.log("Adding to Liked List...");
         var iquery =
           `
-        INSERT INTO likeList (email,imdbID,movieName) VALUES (?,?,?);
-        INSERT INTO recentLikes(imdbID,poster,mName,userID,recency) VALUES (?,?,?,?,NOW());
+        INSERT INTO likes (userID, imdbID, title, poster, recency) VALUES (?,?,?,?,NOW());
         `;
         var dquery =
-          `
-        DELETE FROM likeList WHERE email = ? AND imdbID = ?;
-        DELETE FROM recentLikes WHERE userID = ? AND imdbID = ?;
+        `
+        DELETE FROM likes WHERE userID = ? and imdbID = ?;
         `;
         if (req.body.liked === 'Like') {
           connection.query(iquery,
-            [req.cookies.userData.email, req.params.movieid, req.body.mname,
-              req.params.movieid, req.body.poster, req.body.mname, req.cookies.userData.id
-            ],
+            [req.cookies.userData.id,req.params.movieid,req.body.mname,req.body.poster],
             function(er, results, fields) {
               if (er) {
                 console.log(er);
@@ -820,7 +809,7 @@ app.route("/movie/:movieid") //REWORK
               res.redirect("/movie/" + req.params.movieid);
             })
         } else {
-          connection.query(dquery, [req.cookies.userData.email, req.params.movieid,
+          connection.query(dquery, [req.cookies.userData.id, req.params.movieid,
             req.cookies.userData.id, req.params.movieid
           ], function(er, results, fields) {
             if (er) {
@@ -833,14 +822,12 @@ app.route("/movie/:movieid") //REWORK
         console.log("Adding to Rating List...")
         var iQuery =
           `
-        INSERT INTO ratingsList (email,imdbID,movieName,rating,textbox) VALUES (?,?,?,?,?)
-          ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox);
-        INSERT INTO recentReviews (imdbID,mname,poster,userID,username,rating,textbox,recency) VALUES (?,?,?,?,?,?,?,NOW())
-          ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox), recency = VALUES(recency);
+          INSERT INTO ratings (userID,username,imdbID,title,poster,rating,recency,textbox) VALUES (?,?,?,?,?,?,NOW(),?)
+            ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox), recency = VALUES(recency);
         `;
         connection.query(iQuery, [
-          req.cookies.userData.email, req.params.movieid, req.body.mname, req.body.choice, req.body.tReview,
-          req.params.movieid, req.body.mname, req.body.poster, req.cookies.userData.id, req.cookies.userData.name, req.body.choice, req.body.textbox
+          req.cookies.userData.id,req.cookies.userData.name,req.params.movieid,req.body.mname,req.body.poster,
+          req.body.choice,req.body.tReview
         ], function(errors, result, fi) {
           if (errors) {
             console.log(errors);
@@ -872,7 +859,7 @@ app.get("/profile", function(req, res) { //go to user's specfic profile, or redi
     res.redirect("/");
   }
 })
-app.route("/profile/:userID") 
+app.route("/profile/:userID")
   .get(function(req, res) {
     var profID = req.params.userID;
     var profUser = "";
@@ -995,7 +982,7 @@ app.get("/profile/:userID/deleter/:mID", function(req, res) {
       if (userID == req.cookies.userData.id) {
         var dQuery =
           `
-        DELETE from ratings WHERE userID = ? AND imdbID = ?,
+        DELETE from ratings WHERE userID = ? AND imdbID = ?;
         `;
         connection.query(dQuery, [ req.cookies.userData.id, mID], function(error, results, fields) {
           if (error) {
