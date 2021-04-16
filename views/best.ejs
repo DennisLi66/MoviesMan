@@ -1,0 +1,59 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<h2 style="text-align:center"> Most Liked Movies </h2>
+
+<% if (likes.length == 0){ %>
+  <div style="text-align:center"> There were no liked movies. </div>
+  <% }else{ %>
+  <div class="row" style="width:100%">
+    <% for (let x = 0; x < likes.length; x++){ %>
+    <div class="col-lg-2 col-md-4 col-sm-12">
+      <div class="card" style="height: 450px">
+        <div class="card-header">
+          <a href= <%=  process.env.HTTPSURL + "/movie/" + likes[x].imdbID %>> <%= likes[x].title %> </a>
+        </div>
+        <div class="card-body">
+        <a href= <%=  process.env.HTTPSURL + "/movie/" + likes[x].imdbID %>>  <img class="rbImg" src="<%= likes[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= likes[x].title %>"></a>
+
+        </div>
+        <div class="card-footer">
+          <% if (likes[x].Likes == 1){%>
+          Someone has liked this movie.
+          <% } else { %>
+          <%= likes[x].Likes%> people have liked this movie.
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+
+<h2 style="text-align:center"> Highest MoviesMan Rated Movies </h2>
+
+<% if (rates.length == 0){ %>
+  <div style="text-align:center"> There were no rated movies. </div>
+  <% }else{ %>
+    <div class="row" style="width:100%">
+      <% for (let x = 0; x < rates.length; x++){ %>
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <div class="card">
+          <div class="card-header">
+            <a href= <%=  process.env.HTTPSURL + "/movie/" + rates[x].imdbID %>> <%= rates[x].title %> </a><br>
+          </div>
+          <div class="card-body">
+          <a href= <%=  process.env.HTTPSURL + "/movie/" + rates[x].imdbID %>>  <img class="rbImg" src="<%= rates[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= rates[x].title %>"></a>
+
+          </div>
+          <div class="card-footer">
+            Rated <%= rates[x].Average %> from <%= rates[x].Raters %> raters
+          </div>
+        </div>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+
+
+<%- include('partials/footer') %>

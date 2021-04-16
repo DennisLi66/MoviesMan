@@ -102,6 +102,52 @@ app.get("/recent", function(req, res) {
     }
   })
 })
+app.get("/best",function(req,res){
+  var hiddenOUT = "hidden";
+  var hiddenIN = "";
+  if (req.cookies.userData) {
+    if (req.cookies.userData.temporary) {
+      res.clearCookie('userData');
+      console.log(username + " has been logged out.");
+    } else {
+      res.cookie("userData", req.cookies.userData, {
+        expires: new Date(900000 + Date.now())
+      })
+      console.log(req.cookies.userData.name + " has been reauthenticated");
+      hiddenIN = "hidden";
+      hiddenOUT = "";
+    }
+  }
+  var sQuery =
+  `
+  (select 'Most Liked' as Chosen,likes.imdbID as imdbID, title, poster, Likes, NULL as Average, NULL as Raters, recency from likes
+  left join (select count(imdbID) as Likes, imdbID from likes group by imdbID) tLikes
+  on tLikes.imdbID = likes.imdbID GROUP BY likes.imdbID ORDER BY Likes DESC, recency DESC LIMIT 6)
+  UNION ALL
+  (select 'Best Rated' as Chosen, ratings.imdbID as imdbID, title, poster, NULL as Likes, Average, Raters, recency from ratings
+  left join (select avg(rating) as Average, count(imdbID) as Raters, imdbID FROM ratings group by imdbID) aRating
+  on ratings.imdbID = aRating.imdbID GROUP BY ratings.imdbID ORDER BY Average DESC, recency DESC LIMIT 6)
+  `
+  connection.query(sQuery,function(err,results,fields){
+    if (err){
+      console.log(err);
+      res.redirect("/");
+    }
+    else{
+      console.log(results);
+      var likes = [];
+      var rates = [];
+      for (let u = 0; u < results.length; u++) {
+        if (results[u].Chosen === "Most Liked") {
+          likes.push(results[u]);
+        } else {
+          rates.push(results[u]);
+        }
+      }
+      res.render("best",{banner:"MoviesMan: Top Movies",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN, likes:likes,rates:rates})
+    }
+  })
+})
 app.get("/about", function(req, res) { //FIX THIS TO ACTUALLY DESCRIBE THE SITE
   var hiddenOUT = "hidden";
   var hiddenIN = "";

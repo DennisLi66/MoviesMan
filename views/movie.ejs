@@ -42,10 +42,10 @@
       <input type="submit" value="<%= liked %>" <%= hiddenOUT %>>
     </form>
     <br><br>
-    <% if (rate === '0'){ %>
+    <% if (!rate || rate === '0'){ %>
     This movie has not been rated by MoviesMan users previously.
     <% }else { %>
-    This movie has a MoviesMan collective rating of <%= rate %>.
+    This movie has a MoviesMan collective rating of <%= rate %> from <%= reviews.length %> users.
     <% if (rated === "Unrated"){ %>
     <br>You have not previously rated this movie before.
     <% } else if (rated !== ""){ %>
