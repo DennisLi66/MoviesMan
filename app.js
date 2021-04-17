@@ -31,6 +31,10 @@ connection.connect(); //FIX THIS MOVE CONNECTIONS TO INSIDE SQL CALLS
 app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
   var hiddenOUT = "hidden";
   var hiddenIN = "";
+  var bRated = [];
+  var mLiked = [];
+  var rRated = [];
+  var rLiked = [];
   if (req.cookies.userData) {
     if (req.cookies.userData.temporary) {
       res.clearCookie('userData');
@@ -45,10 +49,64 @@ app.get("/", function(req, res) { //FIX THIS TO MAKE MORE LIKE A HOMEPAGE
       hiddenOUT = "";
     }
   }
-  res.render("home", {
-    banner: "MoviesMan: Homepage",
-    hiddenOUT: hiddenOUT,
-    hiddenIN: hiddenIN
+  var sQuery =
+    `
+  select * from
+  ((select "Like" as Chosen , likes.imdbID, title, poster, count(*) as Likes, NULL as username, NULL as rating, NULL as textbox, NULL as Average, NULL as Raters, max(recency) as recency
+  from likes group by imdbID order by recency DESC LIMIT 6)
+  union all
+  (select "Rate" as Chosen, ratings.imdbID, title, poster, NULL as Likes, username, rating, textbox, Average , NULL as Raters, recency
+  from ratings
+  left join (select imdbID, avg(rating) as Average from ratings group by imdbID) aRating
+  ON ratings.imdbID = aRating.imdbID order by recency DESC LIMIT 6)) a
+  UNION ALL
+  select * from
+  ((select 'Most Liked' as Chosen,likes.imdbID as imdbID, title, poster, Likes, NULL as username, NULL as rating, NULL as textbox,NULL as Average, NULL as Raters, recency from likes
+  left join (select count(imdbID) as Likes, imdbID from likes group by imdbID) tLikes
+  on tLikes.imdbID = likes.imdbID GROUP BY likes.imdbID ORDER BY Likes DESC, recency DESC LIMIT 6)
+  UNION ALL
+  (select 'Best Rated' as Chosen, ratings.imdbID as imdbID, title, poster, NULL as Likes, NULL as username, NULL as rating, NULL as textbox,Average, Raters, recency from ratings
+  left join (select avg(rating) as Average, count(imdbID) as Raters, imdbID FROM ratings group by imdbID) aRating
+  on ratings.imdbID = aRating.imdbID GROUP BY ratings.imdbID ORDER BY Average DESC, recency DESC LIMIT 6)) b
+  `
+  connection.query(sQuery, function(error, results, fields) {
+    if (error) {
+      console.log(error);
+      res.render("home", {
+        banner: "MoviesMan: Homepage",
+        hiddenOUT: hiddenOUT,
+        hiddenIN: hiddenIN,
+        rLiked: rLiked,
+        rRated: rRated,
+        mLiked: mLiked,
+        bRated:bRated
+      })
+    } else {
+      for (var t = 0; t < results.length; t++) {
+        if (results[t].Chosen === 'Like') { // Recently Liked
+          rLiked.push(results[t]);
+        }
+        else if (results[t].Chosen === 'Rate'){
+          rRated.push(results[t]);
+        }
+        else if (results[t].Chosen === 'Best Rated'){
+          bRated.push(results[t]);
+        }
+        else if (results[t].Chosen === 'Most Liked'){
+          mLiked.push(results[t]);
+        }
+      }
+      console.log(rLiked.length);
+      res.render("home", {
+        banner: "MoviesMan: Homepage",
+        hiddenOUT: hiddenOUT,
+        hiddenIN: hiddenIN,
+        rLiked: rLiked,
+        rRated: rRated,
+        mLiked: mLiked,
+        bRated:bRated
+      })
+    }
   })
 }); //REWORK
 app.get("/recent", function(req, res) {
@@ -70,12 +128,12 @@ app.get("/recent", function(req, res) {
   var sQuery =
     `
     (select "Like" as Chosen , likes.imdbID, title, poster, count(*) as totalLikes, NULL as username, NULL as rating, NULL as textbox, NULL as Average, max(recency) as recency
-    from likes group by imdbID LIMIT 6)
+    from likes group by imdbID order by recency DESC LIMIT 6)
     union all
     (select "Rate" as Chosen, ratings.imdbID, title, poster, NULL as totalLikes, username, rating, textbox, Average ,recency
     from ratings
     left join (select imdbID, avg(rating) as Average from ratings group by imdbID) aRating
-    ON ratings.imdbID = aRating.imdbID LIMIT 6) order by recency
+    ON ratings.imdbID = aRating.imdbID order by recency DESC LIMIT 6 )
     `;
   connection.query(sQuery, function(error, results, fields) {
     if (error) {
@@ -102,7 +160,7 @@ app.get("/recent", function(req, res) {
     }
   })
 })
-app.get("/best",function(req,res){
+app.get("/best", function(req, res) {
   var hiddenOUT = "hidden";
   var hiddenIN = "";
   if (req.cookies.userData) {
@@ -119,7 +177,7 @@ app.get("/best",function(req,res){
     }
   }
   var sQuery =
-  `
+    `
   (select 'Most Liked' as Chosen,likes.imdbID as imdbID, title, poster, Likes, NULL as Average, NULL as Raters, recency from likes
   left join (select count(imdbID) as Likes, imdbID from likes group by imdbID) tLikes
   on tLikes.imdbID = likes.imdbID GROUP BY likes.imdbID ORDER BY Likes DESC, recency DESC LIMIT 6)
@@ -128,12 +186,11 @@ app.get("/best",function(req,res){
   left join (select avg(rating) as Average, count(imdbID) as Raters, imdbID FROM ratings group by imdbID) aRating
   on ratings.imdbID = aRating.imdbID GROUP BY ratings.imdbID ORDER BY Average DESC, recency DESC LIMIT 6)
   `
-  connection.query(sQuery,function(err,results,fields){
-    if (err){
+  connection.query(sQuery, function(err, results, fields) {
+    if (err) {
       console.log(err);
       res.redirect("/");
-    }
-    else{
+    } else {
       console.log(results);
       var likes = [];
       var rates = [];
@@ -144,7 +201,13 @@ app.get("/best",function(req,res){
           rates.push(results[u]);
         }
       }
-      res.render("best",{banner:"MoviesMan: Top Movies",hiddenOUT:hiddenOUT,hiddenIN:hiddenIN, likes:likes,rates:rates})
+      res.render("best", {
+        banner: "MoviesMan: Top Movies",
+        hiddenOUT: hiddenOUT,
+        hiddenIN: hiddenIN,
+        likes: likes,
+        rates: rates
+      })
     }
   })
 })
@@ -842,12 +905,12 @@ app.route("/movie/:movieid") //REWORK GET
         INSERT INTO likes (userID, imdbID, title, poster, recency) VALUES (?,?,?,?,NOW());
         `;
         var dquery =
-        `
+          `
         DELETE FROM likes WHERE userID = ? and imdbID = ?;
         `;
         if (req.body.liked === 'Like') {
           connection.query(iquery,
-            [req.cookies.userData.id,req.params.movieid,req.body.mname,req.body.poster],
+            [req.cookies.userData.id, req.params.movieid, req.body.mname, req.body.poster],
             function(er, results, fields) {
               if (er) {
                 console.log(er);
@@ -872,8 +935,8 @@ app.route("/movie/:movieid") //REWORK GET
             ON DUPLICATE KEY UPDATE rating = VALUES(rating), textbox = VALUES(textbox), recency = VALUES(recency);
         `;
         connection.query(iQuery, [
-          req.cookies.userData.id,req.cookies.userData.name,req.params.movieid,req.body.mname,req.body.poster,
-          req.body.choice,req.body.tReview
+          req.cookies.userData.id, req.cookies.userData.name, req.params.movieid, req.body.mname, req.body.poster,
+          req.body.choice, req.body.tReview
         ], function(errors, result, fi) {
           if (errors) {
             console.log(errors);
@@ -1030,7 +1093,7 @@ app.get("/profile/:userID/deleter/:mID", function(req, res) {
           `
         DELETE from ratings WHERE userID = ? AND imdbID = ?;
         `;
-        connection.query(dQuery, [ req.cookies.userData.id, mID], function(error, results, fields) {
+        connection.query(dQuery, [req.cookies.userData.id, mID], function(error, results, fields) {
           if (error) {
             console.log(error);
           }

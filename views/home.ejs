@@ -3,13 +3,114 @@
 
 <!-- Should probably show recent / recent popular movies -->
 <!-- Use a carousel to display relevant movies -->
-
-<h1 style="text-align:center">Welcome to MoviesMan!</h1>
-<div style="text-align:center">We aim to show you the movies that everyone's talking about!</div>
-<h2 style="text-align:center">Highest Rated Movies:</h2>
-<h2 style="text-align:center"> Most Liked Movies: </h2>
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-4" style="text-align:center">Welcome to MoviesMan!</h1>
+    <p class="lead" style="text-align:center">We aim to show you the movies that everyone's talking about!<br>
+      See some examples below:<br></p>
+  </div>
+</div>
 <h2 style="text-align:center">Recently Liked Movies:</h2>
-<h2 style="text-align:center"> Recent Ratings and Reviews: </h2>
+<% if (rLiked.length == 0){ %>
+<div style="text-align:center"> There are no recently liked movies. </div>
+<% } else {%>
+<div class="row" style="width:100%">
+  <% for (let x = 0; x < rLiked.length; x++){ %>
+  <div class="col-lg-2 col-md-4 col-sm-12">
+    <div class="card" style="height: 450px">
+      <div class="card-header">
+        <a href=<%=  process.env.HTTPSURL + "/movie/" + rLiked[x].imdbID %>> <%= rLiked[x].title %> </a>
+      </div>
+      <div class="card-body">
+        <a href=<%=  process.env.HTTPSURL + "/movie/" + rLiked[x].imdbID %>> <img class="rbImg" src="<%= rLiked[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= rLiked[x].title %>"></a>
 
+      </div>
+      <div class="card-footer">
+        <% if (rLiked[x].Likes == 1){%>
+        Someone has liked this movie.
+        <% } else { %>
+        <%= rLiked[x].Likes%> people have liked this movie.
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <% } %>
+</div>
+<% } %>
+<h2 style="text-align:center"> <br>Recent Ratings and Reviews: </h2>
+<%if (rRated.length == 0){ %>
+<div style="text-align:center"> There are no recently rated movies. </div>
+<% } else { %>
+  <div class="row" style="width:100%">
+    <% for (let x = 0; x < rRated.length; x++){ %>
+    <div class="col-lg-2 col-md-6 col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <a href= <%=  process.env.HTTPSURL + "/movie/" + rRated[x].imdbID %>> <%= rRated[x].title %> </a><br>
+          Review from <a href= <%=  process.env.HTTPSURL + "/profile/" + rRated[x].userID %>> <%= rRated[x].username %></a>
+        </div>
+        <div class="card-body">
+        <a href= <%=  process.env.HTTPSURL + "/movie/" + rRated[x].imdbID %>>  <img class="rbImg" src="<%= rRated[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= rRated[x].title %>"></a>
+
+        </div>
+        <div class="card-footer">
+          <%= rRated[x].rating %><br>
+          <% if (rRated[x].textbox){%>
+          <%= rRated[x].textbox %>
+          <% } else { %>
+          <em> The reviewer didn't leave a text review.</em>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+<% } %>
+<h2 style="text-align:center">Highest Rated Movies:</h2>
+<% if (bRated.length == 0){ %>
+  <div style="text-align:center"> There are no highly rated movies. </div>
+<% } else {%>
+  <div class="row" style="width:100%">
+    <% for (let x = 0; x < bRated.length; x++){ %>
+    <div class="col-lg-2 col-md-6 col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <a href= <%=  process.env.HTTPSURL + "/movie/" + bRated[x].imdbID %>> <%= bRated[x].title %> </a><br>
+        </div>
+        <div class="card-body">
+        <a href= <%=  process.env.HTTPSURL + "/movie/" + bRated[x].imdbID %>>  <img class="rbImg" src="<%= bRated[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= bRated[x].title %>"></a>
+
+        </div>
+        <div class="card-footer">
+          Rated <%= bRated[x].Average %> from <%= bRated[x].Raters %> raters
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
+<h2 style="text-align:center"> Most Liked Movies: </h2>
+<div class="row" style="width:100%">
+  <% for (let x = 0; x < mLiked.length; x++){ %>
+  <div class="col-lg-2 col-md-4 col-sm-12">
+    <div class="card" style="height: 450px">
+      <div class="card-header">
+        <a href= <%=  process.env.HTTPSURL + "/movie/" + mLiked[x].imdbID %>> <%= mLiked[x].title %> </a>
+      </div>
+      <div class="card-body">
+      <a href= <%=  process.env.HTTPSURL + "/movie/" + mLiked[x].imdbID %>>  <img class="rbImg" src="<%= mLiked[x].poster %>" onerror="this.src='/images/altImage.png'" alt="<%= mLiked[x].title %>"></a>
+
+      </div>
+      <div class="card-footer">
+        <% if (mLiked[x].Likes == 1){%>
+        Someone has liked this movie.
+        <% } else { %>
+        <%= mLiked[x].Likes%> people have liked this movie.
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <% } %>
+</div>
 
 <%- include('partials/footer') %>

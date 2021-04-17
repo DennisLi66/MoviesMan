@@ -44,27 +44,6 @@ on movies.userID = users.userID
 ORDER BY recency DESC
 ;
 -- movie queries
---     SELECT * FROM
---     (select rL.imdbID as imdbID, movieName as title, ifnull(Likes,0) as Likes, Average, users.userId, users.username, if(liked.imdbID is null,"False","True") as Liked ,rating, textbox from
---     ratingsList left join  (select imdbID, avg(rating) as Average from ratingsList GROUP BY imdbID) rL
---     ON rL.imdbID = ratingsList.imdbID
---     left join users ON users.email = ratingsList.email
---     left join (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
---     ON likes.imdbID = ratingsList.imdbID left join
---     (select imdbID, email from likelist GROUP BY imdbID) liked
---     on liked.email = ratingsList.email AND liked.imdbID = ratingsList.imdbID
---     UNION ALL
---      SELECT likeList.imdbID, likeList.movieName as title, Likes, ifnull(Average,0) as Average, users.userId, users.username, "True" as Liked, ifnull(rating,0) as rating, textbox FROM
---     likeList left join
---     (select imdbID, count(*) as Likes from likelist GROUP BY imdbID) likes
---     on likeList.imdbID = likes.imdbID left join
---     (select avg(rating) as Average,imdbID from ratingsList group by imdbID) rL
---     on rL.imdbID = likeList.imdbID left join
---     (select * from ratingsList) rates ON rates.imdbID = likeList.imdbID AND rates.email = likeList.email
---     left join users on users.email = likeList.email WHERE rating is NULL OR rating = 0
---     ) movies
---     WHERE imdbID = ?
-
 -- imdbid, title, likes, average. usersid, username, Liked, rating, textbox
 select likes.imdbID as imdbID, likes.title as  title, Likes, Average, likes.userID as userID, users.username, 'True' as Liked, ifnull(rating,0) as rating, textbox from likes
 left join users on users.userID = likes.userID
@@ -79,10 +58,29 @@ left join (select imdbID, avg(rating) as Average from ratings group by imdbID) a
 WHERE likes.imdbID is null;
 
 -- BEST MOVIES
-select 'Most Liked' as Chosen,likes.imdbID as imdbID, title, poster, Likes, NULL as Average, NULL as Raters, recency from likes
+(select 'Most Liked' as Chosen,likes.imdbID as imdbID, title, poster, Likes, NULL as Average, NULL as Raters, recency from likes
 left join (select count(imdbID) as Likes, imdbID from likes group by imdbID) tLikes 
-on tLikes.imdbID = likes.imdbID GROUP BY likes.imdbID ORDER BY Likes DESC, recency DESC
-;
-select 'Best Rated' as Chosen, ratings.imdbID as imdbID, title, poster, NULL as Likes, Average, Raters, recency from ratings
+on tLikes.imdbID = likes.imdbID GROUP BY likes.imdbID ORDER BY Likes DESC, recency DESC LIMIT 6)
+UNION ALL
+(select 'Best Rated' as Chosen, ratings.imdbID as imdbID, title, poster, NULL as Likes, Average, Raters, recency from ratings
 left join (select avg(rating) as Average, count(imdbID) as Raters, imdbID FROM ratings group by imdbID) aRating
-on ratings.imdbID = aRating.imdbID GROUP BY ratings.imdbID ORDER BY Average DESC, recency DESC
+on ratings.imdbID = aRating.imdbID GROUP BY ratings.imdbID ORDER BY Average DESC, recency DESC LIMIT 6)
+;
+-- Homepage - Best and Recent
+select * from
+((select "Like" as Chosen , likes.imdbID, title, poster, count(*) as Likes, NULL as username, NULL as rating, NULL as textbox, NULL as Average, NULL as Raters, max(recency) as recency
+from likes group by imdbID LIMIT 6)
+union all
+(select "Rate" as Chosen, ratings.imdbID, title, poster, NULL as Likes, username, rating, textbox, Average , NULL as Raters, recency 
+from ratings
+left join (select imdbID, avg(rating) as Average from ratings group by imdbID) aRating
+ON ratings.imdbID = aRating.imdbID LIMIT 6) order by recency) a
+UNION ALL
+select * from
+((select 'Most Liked' as Chosen,likes.imdbID as imdbID, title, poster, Likes, NULL as username, NULL as rating, NULL as textbox,NULL as Average, NULL as Raters, recency from likes
+left join (select count(imdbID) as Likes, imdbID from likes group by imdbID) tLikes 
+on tLikes.imdbID = likes.imdbID GROUP BY likes.imdbID ORDER BY Likes DESC, recency DESC LIMIT 6)
+UNION ALL
+(select 'Best Rated' as Chosen, ratings.imdbID as imdbID, title, poster, NULL as Likes, NULL as username, NULL as rating, NULL as textbox,Average, Raters, recency from ratings
+left join (select avg(rating) as Average, count(imdbID) as Raters, imdbID FROM ratings group by imdbID) aRating
+on ratings.imdbID = aRating.imdbID GROUP BY ratings.imdbID ORDER BY Average DESC, recency DESC LIMIT 6)) b
