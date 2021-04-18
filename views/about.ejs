@@ -1,8 +1,68 @@
 <%- include('partials/header') %>
 <%- include('partials/navbar') %>
+<div class="row" style="width:100%;text-align:center">
+  <div class="col-lg-12"><h2>About MoviesMan</h2> </div>
+  <div class="col-lg-12">
+MoviesMan is a site all about finding movies. Users can find movies that other users have liked and enjoyed, or even the ones that they have reviewed poorly.<br>
+  </div>
+</div>
+<div class="row" style="width:100%; text-align:center">
+  <div class="col-lg-1"></div>
+  <div class="col-lg-10">
+    <div class="card">
+      <div class="card-header"> Coding Languages Used </div>
+      <div class="card-body" style="color:black">
+        <ul class="list-group">
+          <li class="list-group-item">HTML/EJS was used to display the webpages.</li>
+          <li class="list-group-item">Simple CSS was used, but Bootstrap was used for most of the display work.</li>
+          <li class="list-group-item">Javascript was used to create the backend, specifically using Node and Express.</li>
+          <li class="list-group-item">MYSQL was used to store all the user information, along with likes and opinions on movies.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-1"></div>
 
-Include Details about MoviesMan
+  <div class="col-lg-1"></div>
+  <div class="col-lg-10">
+    <div class="card">
+      <div class="card-header"> Node Packages Used </div>
+      <div class="card-body" style="color:black">
+        <ul class="list-group">
+          <li class="list-group-item"> Express: Used to Serve the website </li>
+          <li class="list-group-item"> BodyParser: Used to supplement Express</li>
+          <li class="list-group-item"> CookieParser: Allows me to implement logging in and out</li>
+          <li class="list-group-item"> EJS: Allows me to make webpages more modular </li>
+          <li class="list-group-item"> Nodemailer: Used to send a recovery email to users </li>
+          <li class="list-group-item"> Randomatic: Used to produce a random token for retrieving passwords </li>
+          <li class="list-group-item"> bcrypt: Allows me to salt and hash passwords for protection </li>
+          <li class="list-group-item"> dotenv: Allows me to store information like keys and mail passwords safely</li>
+          <li class="list-group-item"> mysql: Used to store user data onto storage </li>
+          <li class="list-group-item"> imdb-api: Used to retrieve information about movies found on imdb.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-1"></div>
+  <div class="col-lg-1"></div>
+  <div class="col-lg-10">
+    <div class="card">
+      <div class="card-header"> Features </div>
+      <div class="card-body" style="color:black">
+        <ul class="list-group">
+          <li class="list-group-item"> Uses cookies for logging in and out </li>
+          <li class="list-group-item"> Connects to an imdb-api to retrieve movies based on a title</li>
+          <li class="list-group-item"> Can send a recovery email if password is lost </li>
+          <li class="list-group-item"> Users will have a profile that shows the movies they've liked and/or rated </li>
+          <li class="list-group-item"> Users can like movies to have them show on their profile </li>
+          <li class="list-group-item"> Users can rate movies from 1 to 10 and leave text reviews for movies. </li>
+          <li class="list-group-item"> Users can visit a page to find the movies with the most likes and best ratings. </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-1"></div>
+</div>
 
-Include Social Links
 
 <%- include('partials/footer') %>

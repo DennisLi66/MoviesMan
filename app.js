@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const randomatic = require('randomatic');
 const imdb = require('imdb-api');
-//FIX THIS - ADD MOST LIKED MOVIES, MOST HIGHLY RATED AMONG USERS
+
 
 const app = express();
 app.use(express.static("public"));
