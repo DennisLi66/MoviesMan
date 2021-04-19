@@ -1,5 +1,5 @@
 -- Needs imdbID, title, amount of likes, Average Rating, Number of Raters, reviewer's id and username, reviewers rating and textbox
-
+use movieManDB;
 -- BASIC QUERIES
 select * from users;
 select * from likes;
