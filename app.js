@@ -1197,5 +1197,5 @@ app.route("/changePassword")
     }
   })
 app.listen(process.env.PORT, function() {
-  console.log("Server Started.")
+  console.log("Server Started at Port " + process.env.PORT + ".")
 });
