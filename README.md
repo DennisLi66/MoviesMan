@@ -1,5 +1,7 @@
 # MoviesMan
 
+An example of this site is currently deployed on Heroku at https://salty-brushlands-72357.herokuapp.com/.
+
 MoviesMan is a site meant to store ratings and likes based on the users who make an account with the site. <br>
 
  Coding Languages Used <br>
