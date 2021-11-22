@@ -191,7 +191,8 @@ app.get("/best", function(req, res) {
       console.log(err);
       res.redirect("/");
     } else {
-      console.log(results);
+      // console.log(results);
+      console.log("Heading TO Best...")
       var likes = [];
       var rates = [];
       for (let u = 0; u < results.length; u++) {
