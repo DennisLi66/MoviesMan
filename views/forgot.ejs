@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 <!-- Should probably show recent / recent popular movies -->
 <%- include('partials/navbar') %>
-<div class="confMsg" <%= confHidden %>> We have sent an email to <%= confMsg %>. </div>
+<div class="confMsg" <%= confHidden %>> If that email exists, you should be getting a recovery email shortly. </div>
 <div class="errorMessage" <%= errHidden %>><%= errorMsg %></div>
 
 <div class="card" style="color:black; text-align:center; width: 75%; left: 12.5%">
@@ -11,7 +11,7 @@
   </div>
   <div class="card-body">
     <form action="/forgot" method="POST">
-      <label for="email">Email</label>
+      <label for="email">Email</label><br></br>
       <input type="email" name="email" required>
       <button type="submit" class="btn btn-dark">Submit</button>
     </form>

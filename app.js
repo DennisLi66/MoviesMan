@@ -569,10 +569,10 @@ app.route("/forgot")
           banner: "MoviesMan: Forgot Your Password?",
           hiddenOUT: 'hidden',
           hiddenIN: '',
-          confHidden: 'hidden',
-          confMsg: '',
-          errHidden: '',
-          errorMsg: "There are no accounts with that email."
+          confHidden: '',
+          confMsg: 'email',
+          errHidden: 'hidden',
+          errorMsg: ''
         })
       }
     });
